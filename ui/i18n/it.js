@@ -17,7 +17,7 @@ export default {
   'ui.more.passenger': 'Sono passeggero',
   'ui.more.passengerSub': 'Sblocca i tasti per questo turno',
   'ui.more.passengerText': 'Non stai guidando? Sblocco i tasti solo se il telefono lo usa un passeggero. Chi guida non tocca.',
-  'ui.more.updateLater': 'A fine turno.',
+  'ui.more.updateLater': 'Quando ti fermi.',
   'ui.more.version': 'Versione {v}',
   'ui.map.attribution': 'OpenFreeMap © OpenMapTiles Dati © OpenStreetMap',
   'ui.map.cluster': '{n} note',

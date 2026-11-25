@@ -11,13 +11,13 @@ import * as store from './core/store.js';
 import * as tick from './core/tick.js';
 import * as log from './core/log.js';
 import * as errors from './core/errors.js';
-import * as shifts from './core/model/shifts.js';
 import * as session from './core/shift/session.js';
 import * as backup from './core/data/backup.js';
 import * as instance from './core/platform/instance.js';
 import * as install from './core/platform/install.js';
 import * as swClient from './core/sw-client.js';
-import { initI18n } from './core/i18n.js';
+import { initI18n, t } from './core/i18n.js';
+import { toast } from './ui/kit/toast.js';
 import { mountApp, mountFatal, SHELL_ROUTES } from './ui/shell/app.js';
 import { setFeatures } from './ui/shell/registry-view.js';
 import { startTheme } from './ui/shell/theme.js';
@@ -58,9 +58,10 @@ async function boot() {
   await initI18n(settings.get('lang'), loaders());
 
   const primary = await instance.claimPrimary();
-  const shiftOpen = Boolean(await shifts.getActiveId().catch(() => null));
-  // A waiting worker is applied before first render, never under an open shift.
-  if (await swClient.applyWaitingAtBoot({ shiftOpen }).catch(() => false)) return;
+  // A waiting worker is applied before first render, also under an open shift: the shift is in the
+  // database and session.resumeIfOpen() below picks it up after the reload. Never twice in a row.
+  const updated = swClient.takeUpdated();
+  if (await swClient.applyWaitingAtBoot({ justUpdated: updated }).catch(() => false)) return;
 
   tick.start();
   startTheme();
@@ -80,6 +81,11 @@ async function boot() {
   router.start();
   mountApp(root);
   store.setState({ ready: true });
+  if (updated) {
+    // Once the first screen is up: the toast measures that screen's action bar to sit above it.
+    const say = () => setTimeout(() => toast(t('core.update.done'), { icon: 'check' }), 300);
+    Promise.resolve(bootRoute.def?.load?.()).then(say, say);
+  }
 
   // A colleague who only opened an alert link gets no worker until they choose to keep the app.
   const viewerOnly = bootRoute.name === 'viewer' && settings.get('onboardedAt') === null;

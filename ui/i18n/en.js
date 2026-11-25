@@ -17,7 +17,7 @@ export default {
   'ui.more.passenger': 'I\'m a passenger',
   'ui.more.passengerSub': 'Unlocks the buttons for this shift',
   'ui.more.passengerText': 'Not driving? Buttons unlock only if a passenger is using the phone. The driver does not touch it.',
-  'ui.more.updateLater': 'After the shift.',
+  'ui.more.updateLater': 'When you stop.',
   'ui.more.version': 'Version {v}',
   'ui.map.attribution': 'OpenFreeMap © OpenMapTiles Data © OpenStreetMap',
   'ui.map.cluster': '{n} notes',

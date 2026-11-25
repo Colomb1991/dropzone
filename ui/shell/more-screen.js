@@ -7,6 +7,7 @@ import * as session from '../../core/shift/session.js';
 import * as swClient from '../../core/sw-client.js';
 import { APP_VERSION } from '../../config/app.js';
 import { t } from '../../core/i18n.js';
+import { updateAction } from '../../core/pure/update-policy.js';
 import { useStore } from '../hooks.js';
 import { Screen } from '../kit/screen.js';
 import { List, ListRow } from '../kit/row.js';
@@ -47,7 +48,8 @@ export default function MoreScreen() {
   rows.push({ order: ORDER.share, node: html`<${ListRow} icon="share-2" tone="success" title=${t('core.nav.shareApp')}
     sub=${t('ui.share.sub')} href=${router.href(INVITE_PATH)} chevron />` });
   if (updateReady) {
-    const blocked = Boolean(shift) || !primary;
+    // Same rule as the banner "Nuova versione pronta.": also during a shift, never while moving.
+    const blocked = updateAction({ waiting: true, primary, moving }) !== 'offer';
     rows.push({ order: ORDER.update, node: html`<${ListRow} icon="download" tone="info" title=${t('core.nav.updateApp')}
       sub=${blocked ? t('ui.more.updateLater') : t('core.update.ready')} disabled=${blocked}
       onClick=${() => swClient.applyUpdate()} />` });

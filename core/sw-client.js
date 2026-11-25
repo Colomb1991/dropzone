@@ -6,6 +6,7 @@ import * as settings from './settings.js';
 import * as env from './env.js';
 import * as log from './log.js';
 import { now } from './clock.js';
+import { updateAction, updateCheckDue } from './pure/update-policy.js';
 
 const sw = () => (typeof navigator !== 'undefined' && 'serviceWorker' in navigator ? navigator.serviceWorker : null);
 /** @type {ServiceWorkerRegistration|null} */
@@ -32,6 +33,31 @@ function postTiles() {
   sw()?.controller?.postMessage({ type: 'TILES', allowed: settings.get('svc.tiles') === true });
 }
 
+/**
+ * The one reload that puts the new version on screen. The flag lives for this reload only: the next
+ * boot reads it to say "App aggiornata." once and to never apply two updates in a row.
+ */
+function reloadUpdated() {
+  try {
+    sessionStorage.setItem(env.mirrorKey('updated'), '1');
+  } catch (err) {
+    log.warn('sw', 'flag-failed');
+  }
+  location.reload();
+}
+
+/** Boot: true once, on the start that follows an applied update. */
+export function takeUpdated() {
+  try {
+    const key = env.mirrorKey('updated');
+    if (sessionStorage.getItem(key) !== '1') return false;
+    sessionStorage.removeItem(key);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
 /** After first render. Not called when the boot route is the viewer and the user never onboarded. */
 export async function register() {
   const c = sw();
@@ -43,14 +69,14 @@ export async function register() {
     return false;
   }
   const r = reg;
-  r.addEventListener('updatefound', () => {
-    const w = r.installing;
-    w?.addEventListener('statechange', () => {
-      if (w.state === 'installed') markReady();
-    });
+  const track = (/** @type {ServiceWorker|null} */ w) => w?.addEventListener('statechange', () => {
+    if (w.state === 'installed') markReady();
   });
+  // The browser checks by itself at every start: that install may be running before this line.
+  track(r.installing);
+  r.addEventListener('updatefound', () => track(r.installing));
   c.addEventListener('controllerchange', () => {
-    if (asked) location.reload();
+    if (asked) reloadUpdated();
   });
   markReady();
   postTiles();
@@ -59,9 +85,9 @@ export async function register() {
   return true;
 }
 
-/** At most once per hour. */
+/** At start (`force`) and on every return to the foreground, at most once every 15 minutes. */
 export async function checkForUpdate(force = false) {
-  if (!reg || (!force && now() - lastCheckAt < 3600000)) return;
+  if (!reg || (!force && !updateCheckDue(now(), lastCheckAt))) return;
   lastCheckAt = now();
   try {
     await reg.update();
@@ -71,32 +97,40 @@ export async function checkForUpdate(force = false) {
 }
 
 /**
- * Boot, before first render: a waiting worker is applied when no shift is open and this window
- * is the primary. Resolves true when the page is about to reload.
- * @param {{shiftOpen:boolean}} opts
+ * Boot, before first render: a waiting worker is applied when this window is the primary, also with
+ * a shift open (it is in the database and session.resumeIfOpen() picks it up after the reload).
+ * Resolves true when the page is about to reload.
+ * @param {{justUpdated:boolean}} opts justUpdated: this start is already the reload of an update
  */
 export async function applyWaitingAtBoot(opts) {
   const c = sw();
-  if (!c || opts.shiftOpen || !store.getState().primary) return false;
+  if (!c) return false;
   const r = await c.getRegistration('./');
-  if (!r?.waiting || !c.controller) return false;
+  const s = store.getState();
+  const plan = updateAction({ boot: true, waiting: Boolean(r?.waiting && c.controller), primary: s.primary,
+    moving: s.moving, justUpdated: opts.justUpdated });
+  if (plan !== 'apply') return false;
   return new Promise((resolve) => {
     const timer = setTimeout(() => resolve(false), 3000);
     c.addEventListener('controllerchange', () => {
       clearTimeout(timer);
       resolve(true);
-      location.reload();
+      reloadUpdated();
     }, { once: true });
-    r.waiting?.postMessage({ type: 'SKIP_WAITING' });
+    r?.waiting?.postMessage({ type: 'SKIP_WAITING' });
   });
 }
 
-/** Row "Aggiorna l'app": only the primary window, never during a shift. */
+/**
+ * Banner "Nuova versione pronta." and row "Aggiorna l'app": only the primary window and only when
+ * stopped, also during a shift. The page reloads as soon as the new worker takes control.
+ */
 export function applyUpdate() {
   const s = store.getState();
-  if (!reg?.waiting || !s.primary || s.shift) return false;
+  const w = reg?.waiting;
+  if (!w || updateAction({ waiting: true, primary: s.primary, moving: s.moving }) !== 'offer') return false;
   asked = true;
-  reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+  w.postMessage({ type: 'SKIP_WAITING' });
   return true;
 }
 

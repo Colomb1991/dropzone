@@ -10,8 +10,10 @@ import * as sandbox from '../../core/sandbox.js';
 import * as backup from '../../core/data/backup.js';
 import * as settings from '../../core/settings.js';
 import * as router from '../../core/router.js';
+import * as swClient from '../../core/sw-client.js';
 import * as log from '../../core/log.js';
 import { now } from '../../core/clock.js';
+import { updateAction } from '../../core/pure/update-policy.js';
 import { t, tn } from '../../core/i18n.js';
 import { useStore, useTick } from '../hooks.js';
 import { Banner } from '../kit/banner.js';
@@ -67,6 +69,11 @@ export function pickBanner(s, ctx) {
       action: { label: t('core.banner.rearm'), onClick: () => session.rearmAudio() } };
   }
   if (moving) return { id: 'moving', tone: 'info', icon: 'car', text: t('core.banner.moving') };
+  // Above the warnings that can last a whole shift (no wake lock, weak GPS): one tap and it is gone.
+  if (updateAction({ waiting: s.updateReady, primary: s.primary, moving: s.moving }) === 'offer') {
+    return { id: 'update', tone: 'info', icon: 'download', text: t('core.banner.update'),
+      action: { label: t('core.action.update'), onClick: () => swClient.applyUpdate() } };
+  }
   if (s.gps.state === 'denied' && (ctx.path === undefined || needsLocation(ctx.path))) {
     return { id: 'location', tone: 'warning', icon: 'locate-fixed', text: t('core.banner.locationOff'),
       action: { label: t('core.action.activate'), onClick: () => {
