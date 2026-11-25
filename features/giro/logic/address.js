@@ -1,6 +1,7 @@
 // @ts-check
-// Address text of the route planner: normalisation, pasted lists, Photon results and the match with
-// the door points the courier has learned. Pure: no DOM, no storage, no network.
+// Address text of the route planner: normalisation, Photon results, the match with the door points
+// the courier has learned and the search of a whole list. Reading addresses out of a scanned or
+// pasted text is in extract.js. Pure: no DOM, no storage, no network.
 import { isLat, isLon, cleanText } from '../../../core/pure/validators.js';
 import { round } from '../../../core/pure/geo-math.js';
 
@@ -64,38 +65,6 @@ export function parseCoords(line) {
   const lon = Number(m[2]);
   if (!isLat(lat) || !isLon(lon)) return null;
   return { lat: round(lat, 6), lon: round(lon, 6), label: cleanLabel(m[3] ?? '', 40) };
-}
-
-/**
- * A pasted list, one address per line. List marks ("1.", "2)", "-", "•") are removed, empty and
- * repeated lines dropped, and the list is cut at 150 lines.
- * @param {string} text @param {number} [max]
- * @returns {{items:PasteItem[], repeated:number, over:number}}
- */
-export function parsePaste(text, max = PASTE_MAX_LINES) {
-  /** @type {PasteItem[]} */
-  const items = [];
-  const seen = new Set();
-  let repeated = 0;
-  let over = 0;
-  for (const raw of String(text ?? '').split(/\r\n|\r|\n/)) {
-    const line = cleanText(raw.replace(/\t/g, ' ')).replace(/^(?:\d{1,3}[.)]\s+|[-*•–]\s+)/, '').trim();
-    if (line.length < QUERY_MIN) continue;
-    const point = parseCoords(line);
-    const id = point ? `@${point.lat},${point.lon}` : normalizeAddress(line);
-    if (!id) continue;
-    if (seen.has(id)) {
-      repeated++;
-      continue;
-    }
-    if (items.length >= max) {
-      over++;
-      continue;
-    }
-    seen.add(id);
-    items.push(point ? { kind: 'coords', ...point } : { kind: 'address', text: line.slice(0, QUERY_MAX) });
-  }
-  return { items, repeated, over };
 }
 
 const field = (v, max = 60) => (typeof v === 'string' ? cleanText(v).slice(0, max) : '');
@@ -182,21 +151,26 @@ export function pickSuggestion(text, list) {
 export const PASTE_GAP_MS = 1500;
 
 /**
- * Resolves a pasted list one line at a time: coordinates as they are, then the learned door points,
- * then the online search (best answer), with a pause between two online lookups. A line nobody
- * knows goes to `missing`. When the service says it is off or offline, no further lookup is tried.
+ * Resolves a list (read by extract.js from a scan or a paste) one line at a time: coordinates as they
+ * are, then the learned door points, then the online search (best answer), with a pause between two
+ * online lookups. A line nobody knows goes to `missing`. When the service says it is off or offline,
+ * no further lookup is tried.
  * @param {PasteItem[]} items
  * @param {{doorPoints:DoorPoint[], online:null|((text:string)=>Promise<Suggestion[]>),
  *   wait:(ms:number)=>Promise<void>, onProgress?:(done:number, total:number)=>void,
  *   stopped?:()=>boolean}} deps
  * @returns {Promise<{stops:{lat:number, lon:number, label:string, src:'coords'|'door'|'address',
- *   addr:string|null}[], missing:string[], left:string[], learned:number, down:string|null}>}
- *   `left`: lines not tried because the courier stopped; `down`: why the online search gave up
+ *   addr:string|null}[], missing:string[], missingAt:number[], left:string[], stoppedAt:number,
+ *   learned:number, down:string|null}>}
+ *   `missingAt`: where the missing lines are in `items`; `left`: lines not tried because the courier
+ *   stopped, from index `stoppedAt` on; `down`: why the online search gave up
  */
 export async function resolveItems(items, deps) {
   const stops = [];
   /** @type {string[]} */
   const missing = [];
+  /** @type {number[]} */
+  const missingAt = [];
   let learned = 0;
   let asked = 0;
   /** @type {string|null} */
@@ -232,12 +206,15 @@ export async function resolveItems(items, deps) {
             addr: normalizeAddress(item.text) || null });
         }
       }
-      if (!door && !hit) missing.push(item.text);
+      if (!door && !hit) {
+        missing.push(item.text);
+        missingAt.push(i);
+      }
     }
     deps.onProgress?.(i + 1, items.length);
   }
   const left = items.slice(i).map((it) => (it.kind === 'coords' ? `${it.lat}, ${it.lon} ${it.label}`.trim() : it.text));
-  return { stops, missing, left, learned, down };
+  return { stops, missing, missingAt, left, stoppedAt: i, learned, down };
 }
 
 /**

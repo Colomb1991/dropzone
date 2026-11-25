@@ -3,3 +3,17 @@
 /* A week's heading carries hours ("43 h 10 oltre il contratto"): sentence case, or it reads "43 H 10". */
 .f-ore-week { letter-spacing: 0; text-transform: none; font-size: var(--fs-caption); line-height: var(--lh-caption); }
 .f-ore-actions { display: grid; gap: var(--sp-3); margin-top: var(--sp-4); }
+/* Month calendar: seven equal columns, Monday first. The whole cell is the target (48 px high); the
+   disc inside it is what the eye reads. A day with a shift is filled with the accent of this
+   section, today wears a ring, days still to come are dim. */
+.f-ore-cal { padding: var(--sp-2) 0 var(--sp-3); background: var(--surface); border: var(--border-w) solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-1); }
+.f-ore-cal__grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.f-ore-cal__names { padding-bottom: var(--sp-1); text-align: center; font-size: var(--fs-overline); line-height: var(--lh-overline); font-weight: var(--fw-strong); text-transform: uppercase; color: var(--text-3); }
+.f-ore-cal__day { display: grid; place-items: center; min-height: var(--tap-min); padding: 0; background: none; border: 0; color: var(--text); font-size: var(--fs-label-m); font-weight: var(--fw-strong); cursor: pointer; }
+.f-ore-cal__day > .num { display: grid; place-items: center; width: 38px; height: 38px; border: 2px solid transparent; border-radius: 50%; }
+.f-ore-cal__day:active > .num { background: var(--surface-2); }
+.f-ore-cal__day:disabled { color: var(--text-3); cursor: default; }
+.f-ore-cal__day[data-worked] > .num { background: var(--section); color: var(--bg); font-weight: var(--fw-bold); }
+.f-ore-cal__day[aria-current="date"] > .num { border-color: var(--text); }
+.f-ore-cal__day[data-worked][aria-current="date"] > .num { box-shadow: inset 0 0 0 2px var(--bg); }
+.f-ore-cal__sum { margin: var(--sp-2) var(--sp-4) 0; font-size: var(--fs-title-s); line-height: var(--lh-title-s); font-weight: var(--fw-strong); }

@@ -32,6 +32,9 @@ p.t-caption, p.t-body-m { margin: 0; }
 .screen__back { margin-left: calc(var(--sp-2) * -1); }
 .screen__title { flex: 1; min-width: 0; margin: 0; font-family: var(--font-display); font-size: var(--fs-title-l); line-height: var(--lh-title-l); font-weight: var(--fw-title); letter-spacing: var(--ls-title); overflow-wrap: anywhere; }
 .screen__title:focus { outline: none; }
+/* The section's icon next to the title of its own screen. */
+.screen__badge { width: 36px; height: 36px; border-radius: 12px; }
+.screen__badge > .icon { width: 20px; height: 20px; }
 .screen__tags { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
 .screen__body { display: grid; gap: var(--sp-3); align-content: start; }
 /* The bar fades into the page instead of drawing a second line above the navigation. */
@@ -92,6 +95,12 @@ label.row .row__sub { display: block; -webkit-line-clamp: unset; overflow: visib
 .tile[data-tone] { border-color: var(--tone-text); }
 .tile[data-tone] > .icon { color: var(--tone-text); }
 .tile:disabled .icon, .tile[aria-disabled="true"] .icon { color: inherit; }
+/* Icon in a badge (a tile with an accent, or `badge`): the badge gives the colour. On the primary
+   fill and switched off it steps back; with a tone it takes the tone. */
+.tile .badge > .icon { color: inherit; }
+.tile[data-tone] .badge { background: var(--tone-soft); color: var(--tone-text); }
+.tile--primary .badge { background: rgb(128 128 128 / .22); color: inherit; }
+.tile:disabled .badge, .tile[aria-disabled="true"] .badge { background: transparent; color: inherit; }
 .tile__label { display: block; }
 .tile__text { display: grid; gap: 2px; }
 
@@ -150,6 +159,10 @@ select.field__control { padding-right: var(--sp-10); background-image: linear-gr
 .photo-view[open] { display: grid; grid-template-rows: 1fr auto; }
 .photo-view__img { width: 100%; height: 100%; min-height: 0; object-fit: contain; }
 .photo-view__bar { display: grid; padding: var(--sp-3) var(--sp-4) calc(var(--sp-4) + var(--safe-b)); }
+/* The viewer is black in every theme: its quiet buttons are white, also on paper and in "sole". */
+.photo-view .btn--secondary, .photo-view .btn--ghost { color: #FFFFFF; }
+.photo-view .btn--secondary { border-color: rgb(255 255 255 / .5); }
+.photo-view .btn--secondary:active, .photo-view .btn--ghost:active { background: rgb(255 255 255 / .16); }
 
 /* ---------- "Altro" ---------- */
 .more__brand { display: grid; gap: var(--sp-1); padding: var(--sp-5) var(--sp-4); background: var(--surface); color: var(--text); border: var(--border-w) solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-1); }

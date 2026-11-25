@@ -11,15 +11,16 @@ const dayLabel = (ts) => `${format.weekday(((new Date(ts).getDay() + 6) % 7) + 1
 /**
  * Edit start, end and break minutes of a closed shift, or add one, with the in-app keypad (SPEC 6.4).
  * @param {{shift:import('../logic/hours.js').ShiftLike|null, ym:{y:number, m:number}, now:number,
- *   onClose:()=>void}} props  `shift: null` adds a shift in the month shown
+ *   day?:number, onClose:()=>void}} props  `shift: null` adds a shift in the month shown, on `day`
+ *   when the calendar asked for one. A shift added here is marked as added by hand.
  */
-export function EditSheet({ shift, ym, now, onClose }) {
+export function EditSheet({ shift, ym, now, day: askedDay, onClose }) {
   const today = new Date(now);
   const thisMonth = today.getFullYear() === ym.y && today.getMonth() + 1 === ym.m;
   const maxDay = thisMonth ? today.getDate() : new Date(ym.y, ym.m, 0).getDate();
   const origBreakMin = shift ? Math.round(shiftTotals(shift, false, now).breakMs / 60000) : 30;
 
-  const [day, setDay] = useState(maxDay);
+  const [day, setDay] = useState(() => Math.min(maxDay, Math.max(1, askedDay ?? maxDay)));
   const [values, setValues] = useState(() => ({
     start: shift ? timeDigits(shift.startAt) : '0800',
     end: shift ? timeDigits(/** @type {number} */ (shift.endAt)) : '1700',
@@ -51,7 +52,7 @@ export function EditSheet({ shift, ym, now, onClose }) {
       await shifts.editShift(shift.id, breakMin === origBreakMin ? patch : { ...patch, breaks: built.breaks });
     } else {
       await shifts.saveShift({ id: crypto.randomUUID(), ...built, mode: settings.get('shift.mode') ?? 'holder',
-        edited: true, alertsFired: 0, lastSeenAt: built.endAt });
+        edited: true, manual: true, alertsFired: 0, lastSeenAt: built.endAt });
     }
     toast(t('ore.edit.saved'), { icon: 'check' });
     onClose();

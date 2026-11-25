@@ -11,6 +11,7 @@ import { updateAction } from '../../core/pure/update-policy.js';
 import { useStore } from '../hooks.js';
 import { Screen } from '../kit/screen.js';
 import { List, ListRow } from '../kit/row.js';
+import { sectionAccent } from '../kit/accent.js';
 import { Toggle } from '../kit/toggle.js';
 import { confirm } from '../kit/dialog.js';
 import { moreItems } from './registry-view.js';
@@ -38,15 +39,16 @@ export default function MoreScreen() {
 
   const rows = moreItems().map((n) => ({
     order: n.order,
-    node: html`<${ListRow} icon=${n.icon} tone=${n.tone} title=${t(n.labelKey)} href=${router.href(n.to)} chevron
+    node: html`<${ListRow} icon=${n.icon} tone=${n.tone} accent=${sectionAccent(n.featureId)} title=${t(n.labelKey)}
+      href=${router.href(n.to)} chevron
       tags=${n.beta ? [{ label: t('ui.tag.beta'), icon: 'flask-conical' }] : undefined} />`,
   }));
   if (shift && shift.mode === 'holder' && (!moving || passenger)) {
     rows.push({ order: ORDER.passenger, node: html`<${Toggle} label=${t('ui.more.passenger')}
       sub=${t('ui.more.passengerSub')} checked=${passenger} onChange=${togglePassenger} />` });
   }
-  rows.push({ order: ORDER.share, node: html`<${ListRow} icon="share-2" tone="success" title=${t('core.nav.shareApp')}
-    sub=${t('ui.share.sub')} href=${router.href(INVITE_PATH)} chevron />` });
+  rows.push({ order: ORDER.share, node: html`<${ListRow} icon="share-2" accent=${sectionAccent('invita')}
+    title=${t('core.nav.shareApp')} sub=${t('ui.share.sub')} href=${router.href(INVITE_PATH)} chevron />` });
   if (updateReady) {
     // Same rule as the banner "Nuova versione pronta.": also during a shift, never while moving.
     const blocked = updateAction({ waiting: true, primary, moving }) !== 'offer';

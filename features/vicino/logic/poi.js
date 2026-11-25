@@ -7,6 +7,8 @@ export const NEIGHBOUR_M = 1500;
 export const MAX_CELLS = 4;
 export const LIST_LIMIT = 20;
 export const CACHE_FRESH_MS = 7 * 86400000;
+/** Bump when normalizeElements changes what it stores: older saved cells are then rebuilt. */
+export const ITEMS_VERSION = 2;
 export const PACK_FRESH_MS = 30 * 86400000;
 const DAY_MS = 86400000;
 
@@ -73,7 +75,10 @@ export function normalizeElements(elements) {
     if (!kind || !Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) continue;
     out.push({
       id: `${String(el.type ?? 'n').charAt(0)}${el.id}`, lat, lon, kind,
-      name: str(tags.name, 60) || str(tags.brand, 60) || str(tags.operator, 60),
+      // A fountain or a public toilet run by a utility is not "named" after it: the operator
+      // is a useful title only where people know the place by it (fuel, shops, bars).
+      name: str(tags.name, 60) || str(tags.brand, 60)
+        || (kind === 'drinking_water' || kind === 'toilets' ? '' : str(tags.operator, 60)),
       fee: tags.fee === 'yes', customers: tags.access === 'customers', hours: str(tags.opening_hours, 80),
     });
   }
@@ -154,7 +159,7 @@ export function planCell({ cachedAt, packAt, now, canFetch }) {
 export function validateCell(rec) {
   if (rec === null || typeof rec !== 'object' || !/^-?\d+:-?\d+$/.test(rec.cellId)) return null;
   if (!(rec.fetchedAt > 0) || !Array.isArray(rec.items)) return null;
-  return { cellId: rec.cellId, fetchedAt: rec.fetchedAt, items: rec.items, src: rec.src === 'pack' ? 'pack' : 'net' };
+  return { cellId: rec.cellId, fetchedAt: rec.fetchedAt, items: rec.items, src: rec.src === 'pack' ? 'pack' : 'net', ...(Number.isInteger(rec.v) ? { v: rec.v } : {}) };
 }
 
 /**
@@ -175,7 +180,9 @@ export async function loadCells(cellIds, deps) {
       have = true;
       deps.onCell(rec);
     };
-    const cached = await deps.getCell(cellId).catch(() => null);
+    // A cell saved with an older items format is still a valid record, but it is rebuilt, not shown.
+    const saved = await deps.getCell(cellId).catch(() => null);
+    const cached = saved && saved.v === ITEMS_VERSION ? saved : null;
     if (cached) show(cached);
     const fresh = cached && deps.now() - cached.fetchedAt < CACHE_FRESH_MS;
     const pack = fresh ? null : await deps.packIndex().catch(() => null);
@@ -183,7 +190,7 @@ export async function loadCells(cellIds, deps) {
     const plan = planCell({ cachedAt: cached?.fetchedAt ?? null, packAt, now: deps.now(), canFetch: deps.canFetch() });
     if (plan.use === 'pack' && packAt !== null) {
       try {
-        const rec = { cellId, fetchedAt: packAt, items: normalizeElements(await deps.packCell(cellId)), src: 'pack' };
+        const rec = { cellId, fetchedAt: packAt, items: normalizeElements(await deps.packCell(cellId)), src: 'pack', v: ITEMS_VERSION };
         await deps.putCell(rec).catch(() => undefined);
         show(rec);
       } catch (err) {
@@ -193,7 +200,7 @@ export async function loadCells(cellIds, deps) {
     }
     if (plan.refresh) {
       try {
-        const rec = { cellId, fetchedAt: deps.now(), items: normalizeElements(await deps.fetchCell(cellId)), src: 'net' };
+        const rec = { cellId, fetchedAt: deps.now(), items: normalizeElements(await deps.fetchCell(cellId)), src: 'net', v: ITEMS_VERSION };
         await deps.putCell(rec).catch(() => undefined);
         show(rec);
       } catch (err) {

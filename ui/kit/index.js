@@ -1,6 +1,7 @@
 // @ts-check
 // Everything a feature may use from the kit.
-export { Icon } from './icon.js';
+export { Icon, IconBadge } from './icon.js';
+export { ACCENTS, SECTION_ACCENT, sectionAccent } from './accent.js';
 export { Art } from './art.js';
 export { Button, LinkButton } from './button.js';
 export { Tile, Tiles } from './tile.js';

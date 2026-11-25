@@ -15,11 +15,12 @@ import { Empty } from '../kit/empty.js';
 import { ToastHost } from '../kit/toast.js';
 import { ConfirmHost } from '../kit/dialog.js';
 import { SlotOutlet } from '../kit/slot.js';
+import { SectionContext } from '../kit/accent.js';
 import { Nav, MORE_PATH } from './nav.js';
 import { AlertHost } from './alert-host.js';
 import { ErrorScreen } from './error-screen.js';
 import { useMovingLock, lockTapHandler } from './moving-lock.js';
-import { tabItems } from './registry-view.js';
+import { tabItems, sectionOf } from './registry-view.js';
 
 const WELCOME_PATH = '/benvenuto';
 
@@ -59,7 +60,10 @@ function RouteView({ route }) {
   }, []);
   if (error || !route.def) return html`<${ErrorScreen} titleKey="core.err.generic" />`;
   if (!Comp) return slow ? html`<div class="loading" role="status">${t('core.state.loading')}</div>` : null;
-  return html`<${Comp} params=${route.params} query=${route.query} route=${route} />`;
+  // The screen learns which section it is: Screen puts that section's icon and colour in its header.
+  return html`<${SectionContext.Provider} value=${sectionOf(route.def)}>
+    <${Comp} params=${route.params} query=${route.query} route=${route} />
+  <//>`;
 }
 
 function Boundary({ children }) {

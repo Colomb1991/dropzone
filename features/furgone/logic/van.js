@@ -121,6 +121,20 @@ export function addPhoto(session, photo, fix) {
   };
 }
 
+/**
+ * Takes one photo (guided or extra) out of a session. A session left with no photos and no ticked
+ * checklist is nothing: `session` is then null and its record goes too.
+ * @param {VanSession} session @param {string} mediaId @param {number} at
+ * @returns {{session:VanSession|null, removed:VanPhoto|null}} `removed`: null when the photo is not there
+ */
+export function removePhoto(session, mediaId, at) {
+  const removed = session.photos.find((p) => p.mediaId === mediaId) ?? null;
+  if (!removed) return { session, removed: null };
+  const photos = session.photos.filter((p) => p !== removed);
+  if (photos.length === 0 && (session.checks ?? []).length === 0) return { session: null, removed };
+  return { session: { ...session, photos, updatedAt: Math.max(session.updatedAt, at) }, removed };
+}
+
 /** Local "YYYY-MM-DD". */
 export function dayKey(ts) {
   const d = new Date(ts);

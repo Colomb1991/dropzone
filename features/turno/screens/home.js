@@ -1,7 +1,7 @@
 // @ts-check
 import { html, useEffect, useState } from '../../../ui/html.js';
 import { useStore, useLang, useTick, useLive, useAction } from '../../../ui/hooks.js';
-import { Screen, Button, Sheet, Tile, Tiles, SlotOutlet } from '../../../ui/kit/index.js';
+import { Screen, Button, Sheet, Tile, Tiles, SlotOutlet, sectionAccent } from '../../../ui/kit/index.js';
 import { t, session, settings, slots, router, log } from '../../../core/api.js';
 import { greeting } from '../logic/shift-math.js';
 import * as state from '../state.js';
@@ -48,7 +48,8 @@ function IdleHome() {
       <p class="t-title-m">${t(`turno.greet.${greeting(now)}`)}</p>
       <${SlotOutlet} name="home.idle" />
       ${shown.length > 0 && html`<${Tiles}>
-        ${shown.map((x) => html`<${Tile} icon=${x.icon} label=${t(x.labelKey)} value=${x.value} href=${router.href(x.to)} />`)}
+        ${shown.map((x) => html`<${Tile} icon=${x.icon} accent=${sectionAccent(x.featureId)} label=${t(x.labelKey)}
+          value=${x.value} href=${router.href(x.to)} />`)}
       <//>`}
       <p class="t-caption t-muted">${t('turno.idle.caption')}</p>
     </div>

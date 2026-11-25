@@ -1,11 +1,13 @@
 // @ts-check
 import { html, useMemo, useState } from '../../../ui/html.js';
 import { useLive, useLang, useSetting, useTick, useAction } from '../../../ui/hooks.js';
-import { Screen, Button, List, ListRow, Empty } from '../../../ui/kit/index.js';
+import { Screen, Button, List, ListRow } from '../../../ui/kit/index.js';
 import { t, tn, shifts, share, format, router, clock } from '../../../core/api.js';
 import { monthSummary, monthRange } from '../logic/hours.js';
+import { monthCalendar } from '../logic/calendar.js';
 import { monthCsv, csvFileName } from '../logic/csv.js';
 import { EditSheet } from './edit-sheet.js';
+import { MonthCalendar, DaySheet, MarkSheet, dayLabel, shiftTags } from './calendar.js';
 import { ymKey, comparePayslip } from '../logic/payslip.js';
 import { PayslipSheet, diffText } from './payslip-sheet.js';
 
@@ -14,7 +16,6 @@ const ymOf = (ts) => {
   return { y: d.getFullYear(), m: d.getMonth() + 1 };
 };
 const step = (ym, by) => ymOf(new Date(ym.y, ym.m - 1 + by, 1).getTime());
-const dayLabel = (ts) => `${format.weekday(((new Date(ts).getDay() + 6) % 7) + 1, 'short')} ${format.dateShort(ts)}`;
 
 function ShiftRow({ row, onEdit }) {
   const { shift, totals } = row;
@@ -27,7 +28,7 @@ function ShiftRow({ row, onEdit }) {
     title=${t('ore.day.title', { day, from: format.time(shift.startAt), to: format.time(shift.endAt) })}
     sub=${t('ore.day.sub', { inShift: format.duration(totals.inShiftMs), worked: format.duration(totals.workedMs),
       pause: format.duration(totals.breakMs) })}
-    tags=${shift.edited ? [{ label: t('core.tag.edited'), icon: 'pencil' }] : undefined}
+    tags=${shiftTags(shift)}
     chevron onClick=${() => onEdit(shift)} />`;
 }
 
@@ -37,8 +38,10 @@ export default function OreScreen() {
   const [ym, setYm] = useState(() => ymOf(clock.now()));
   const [weeklyHours] = useSetting('contract.weeklyHours');
   const [breakPaid] = useSetting('contract.breakPaid');
-  /** null = closed, 'add', or the shift being edited */
+  /** null = closed, 'add', {add: day of the month}, or the shift being edited */
   const [editing, setEditing] = useState(/** @type {any} */ (null));
+  /** The day of the calendar that is open (its key), in the sheet of its shifts or in "Segna come lavorato". */
+  const [dayKey, setDayKey] = useState(/** @type {string|null} */ (null));
   const [payslips] = useSetting('ore.payslip');
   const [paying, setPaying] = useState(false);
 
@@ -49,6 +52,10 @@ export default function OreScreen() {
   const list = live.data ?? [];
   const sum = useMemo(() => monthSummary(list, ym.y, ym.m, { weeklyHours, breakPaid: breakPaid === true, now }),
     [list, ym.y, ym.m, weeklyHours, breakPaid, now]);
+  const cal = useMemo(() => monthCalendar(list, ym.y, ym.m, { breakPaid: breakPaid === true, now }),
+    [list, ym.y, ym.m, breakPaid, now]);
+  // Read from the live calendar: the sheet follows what is stored (a shift removed, a day just marked).
+  const openDay = dayKey ? cal.days.find((d) => d.key === dayKey) ?? null : null;
 
   // Prepare, then tap: the file exists before the button is enabled (SPEC 6.4).
   const file = useMemo(() => {
@@ -80,7 +87,8 @@ export default function OreScreen() {
       </div>
 
       ${live.loading && !live.data && html`<p class="loading">${t('core.state.loading')}</p>`}
-      ${live.data && sum.count === 0 && html`<${Empty} icon="calendar-days" title=${t('ore.empty')} />`}
+      ${live.data && html`<${MonthCalendar} cal=${cal} onDay=${(d) => setDayKey(d.key)} />
+        <p class="t-caption t-muted">${t('ore.cal.hint')}</p>`}
 
       ${sum.count > 0 && html`<${List} label=${format.monthTitle(ym.y, ym.m)}>
         <${ListRow} title=${t('ore.stat.inShift')} value=${dur(sum.inShiftMs)} />
@@ -120,7 +128,18 @@ export default function OreScreen() {
     </div>
     ${paying && html`<${PayslipSheet} key=${ymKey(ym.y, ym.m)} ym=${ym} workedMs=${sum.workedMs}
       onClose=${() => setPaying(false)} />`}
-    ${editing && html`<${EditSheet} shift=${editing === 'add' ? null : editing} ym=${ym} now=${now}
-      onClose=${() => setEditing(null)} />`}
+    ${openDay && !editing && (openDay.worked
+      ? html`<${DaySheet} key=${openDay.key} day=${openDay} breakPaid=${breakPaid === true} now=${now}
+          onEdit=${(shift) => {
+            setDayKey(null);
+            setEditing(shift);
+          }} onClose=${() => setDayKey(null)} />`
+      : html`<${MarkSheet} key=${openDay.key} day=${openDay} now=${now}
+          onWrite=${() => {
+            setDayKey(null);
+            setEditing({ add: openDay.day });
+          }} onClose=${() => setDayKey(null)} />`)}
+    ${editing && html`<${EditSheet} shift=${editing === 'add' || editing.add ? null : editing} ym=${ym} now=${now}
+      day=${editing.add} onClose=${() => setEditing(null)} />`}
   <//>`;
 }

@@ -3,6 +3,7 @@ import { html, useEffect, useState } from '../../../ui/html.js';
 import { useStore, useTick, useSetting, useSlot, useAction, useLive, useLang } from '../../../ui/hooks.js';
 import {
   Screen, Button, Sheet, Tile, Tag, Icon, List, ListRow, SlotOutlet, confirm, setShiftContrast, shiftContrast,
+  sectionAccent,
 } from '../../../ui/kit/index.js';
 import { t, session, speech, presenter, router, format, env, slots, clock } from '../../../core/api.js';
 import { breakState, countdown, contextOrder } from '../logic/shift-math.js';
@@ -64,9 +65,13 @@ function AutoLockSheet({ onClose }) {
   <//>`;
 }
 
-/** One `shift.context` row: a link when the feature gave a route, plain text otherwise. */
+/**
+ * One `shift.context` row: a link when the feature gave a route, plain text otherwise. Its icon
+ * wears the accent of the section that offered it.
+ */
 function ContextRow({ row }) {
-  return html`<${ListRow} icon=${row.icon} tone=${row.tone} title=${row.title} sub=${row.sub}
+  return html`<${ListRow} icon=${row.icon} tone=${row.tone} accent=${sectionAccent(row.featureId)}
+    title=${row.title} sub=${row.sub}
     chevron=${Boolean(row.to)} href=${row.to ? router.href(row.to) : undefined} />`;
 }
 
@@ -176,12 +181,13 @@ export default function ShiftHome({ shift }) {
       <${SlotOutlet} name="home.shift" />
       ${contextRows.length > 0 && html`<${List}><${ContextRow} row=${contextRows[0]} /><//>`}
       <div class="tiles f-turno-tiles">
-        <${Tile} icon="coffee" label=${t('turno.tile.break')} primary=${b.running}
+        <${Tile} icon="coffee" accent=${sectionAccent('turno')} label=${t('turno.tile.break')} primary=${b.running}
           value=${b.running ? countdown(b.leftMs) : t('core.fmt.min', { n: breakMin })}
           onClick=${() => setSheet('break')} />
-        ${reportTile && html`<${Tile} icon="megaphone" label=${t('turno.tile.report')} href=${router.href('/segnala')} />`}
-        <${Tile} icon="layout-grid" label=${t('turno.tools')} onClick=${() => setSheet('tools')} />
-        <${Tile} icon="square" label=${t('turno.end')} tone="danger" onClick=${end.run} />
+        ${reportTile && html`<${Tile} icon="megaphone" accent=${sectionAccent('segnala')}
+          label=${t('turno.tile.report')} href=${router.href('/segnala')} />`}
+        <${Tile} icon="layout-grid" accent="neutral" label=${t('turno.tools')} onClick=${() => setSheet('tools')} />
+        <${Tile} icon="square" badge label=${t('turno.end')} tone="danger" onClick=${end.run} />
       </div>
     </div>
     ${sheet === 'briefing' && html`<${Briefing} shift=${shift} onClose=${() => setSheet(null)} />`}

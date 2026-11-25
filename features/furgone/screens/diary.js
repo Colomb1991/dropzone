@@ -1,6 +1,7 @@
 // @ts-check
 // Diario furgone (SPEC 4.11): four guided photos plus extras, each with date, time and position
-// burnt in; share (files are ready before the tap); history by day. Photos are never auto-deleted.
+// burnt in; share (files are ready before the tap); history by day. Photos are never auto-deleted:
+// the courier deletes one photo from its full-screen view, a whole session from the history.
 import { html, useEffect, useRef, useState } from '../../../ui/html.js';
 import {
   Screen, Button, Tile, Tiles, Chip, Chips, Banner, Dialog, Empty, List, ListRow, Sheet, Thumb, PhotoView,
@@ -15,6 +16,7 @@ import {
   canAddExtra, addPhoto, currentSession, defaultKind, groupByDay, oldPhotos, sessionBytes, withChecks,
 } from '../logic/van.js';
 import { checksSummary } from '../logic/checklist.js';
+import { deletePhoto, deleteSession } from '../logic/data.js';
 import { ChecklistSheet, ChecksList, checksLine } from './checklist-sheet.js';
 
 const PAGE = 30;
@@ -30,9 +32,12 @@ const showError = (err) => {
 
 /**
  * Files of a session, built as soon as its photos are known, so "Invia le foto" only shares.
+ * The full-screen view of a photo is also where that one photo is deleted.
+ * @param {import('../logic/van.js').VanSession|null|undefined} session
+ * @param {() => void} [onGone] called when the last photo went and took the session with it
  * @returns {{files:File[]|null, send:()=>void, open:(i:number)=>void, viewer:any}}
  */
-function useSessionShare(session) {
+function useSessionShare(session, onGone) {
   const cache = useRef(/** @type {Map<string, File>} */ (new Map())).current;
   const [files, setFiles] = useState(/** @type {File[]|null} */ (null));
   const [view, setView] = useState(-1);
@@ -78,11 +83,26 @@ function useSessionShare(session) {
 
   const shown = view >= 0 ? photos[view] : undefined;
   const file = shown ? cache.get(shown.mediaId) : undefined;
+  const drop = async (p) => {
+    const ok = await confirm({ icon: 'trash-2', danger: true, title: t('furgone.photo.deleteTitle'),
+      text: t('furgone.deleteText'), confirm: t('core.action.delete'), cancel: t('furgone.deleteKeep') });
+    if (!ok || !session) return;
+    // Picture and diary record in one transaction (logic/data.js).
+    const went = await deletePhoto(session.id, p.mediaId);
+    cache.delete(p.mediaId);
+    setView(-1);
+    if (went !== 'missing') toast(t('furgone.photo.deleted'));
+    if (went === 'session' && onGone) onGone();
+  };
   const viewer = shown && html`<${PhotoView} key=${shown.mediaId} mediaId=${shown.mediaId}
     alt=${t('furgone.photoAlt', { label: t(`furgone.label.${shown.label}`) })} onClose=${() => setView(-1)}
     footer=${html`<div class="f-furgone-bar">
-      <${Button} block icon="download" label=${t('core.action.download')} disabled=${!file}
-        onClick=${() => file && share.downloadFile(file)} />
+      <div class="btn-row">
+        <${Button} icon="download" label=${t('core.action.download')} disabled=${!file}
+          onClick=${() => file && share.downloadFile(file)} />
+        <${Button} variant="ghost" icon="trash-2" label=${t('core.action.delete')}
+          onClick=${() => drop(shown).catch(showError)} />
+      </div>
       ${view < photos.length - 1 && html`<${Button} block variant="secondary" label=${t('furgone.next')}
         onClick=${() => setView(view + 1)} />`}
     </div>`} />`;
@@ -103,7 +123,7 @@ function Thumbs({ photos, onOpen }) {
 }
 
 function HistorySheet({ session, onClose }) {
-  const shareKit = useSessionShare(session);
+  const shareKit = useSessionShare(session, onClose);
   const hasPhotos = session.photos.length > 0;
   const remove = async () => {
     const ok = await confirm({ icon: 'trash-2', danger: true,
@@ -111,10 +131,7 @@ function HistorySheet({ session, onClose }) {
       text: t('furgone.deleteText'), confirm: t('core.action.delete'), cancel: t('furgone.deleteKeep') });
     if (!ok) return;
     // One transaction: no diary record is left pointing at deleted photos.
-    await db.tx(['media', 'van'], 'rw', async (tx) => {
-      for (const p of session.photos) await tx.del('media', p.mediaId);
-      await tx.del('van', session.id);
-    });
+    await deleteSession(session);
     toast(t(hasPhotos ? 'furgone.deleted' : 'furgone.check.deleted'));
     onClose();
   };

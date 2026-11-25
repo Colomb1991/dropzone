@@ -3,7 +3,7 @@
 import { html, useState } from '../../../ui/html.js';
 import { t, geo, proximity } from '../../../core/api.js';
 import { useLang, useAction } from '../../../ui/hooks.js';
-import { Card, Button } from '../../../ui/kit/index.js';
+import { Card, Button, sectionAccent } from '../../../ui/kit/index.js';
 import { useNearbyNotes, NearbyRows } from '../components/nearby.js';
 
 export default function NearbyIdle() {
@@ -16,7 +16,7 @@ export default function NearbyIdle() {
     setState(fix ? 'shown' : 'nofix');
   });
   if (total === 0) return null;
-  return html`<${Card} icon="map-pin" title=${t('note.here.ask')}>
+  return html`<${Card} icon="map-pin" accent=${sectionAccent('note')} title=${t('note.here.ask')}>
     ${state === 'shown' && html`<${NearbyRows} rows=${rows} />`}
     ${state === 'nofix' && html`<p class="t-body-m t-muted">${t('note.here.noFix')}</p>`}
     <${Button} variant="secondary" icon="locate-fixed" label=${t('note.here.look')} busy=${look.busy}

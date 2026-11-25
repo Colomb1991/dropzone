@@ -4,7 +4,7 @@
 import { html } from '../../../ui/html.js';
 import { t, router, format, clock } from '../../../core/api.js';
 import { useLive, useLang, useFix, useTick, useAction } from '../../../ui/hooks.js';
-import { Tile, toast } from '../../../ui/kit/index.js';
+import { Tile, toast, sectionAccent } from '../../../ui/kit/index.js';
 import { loadSpot, saveHere, clearSpot } from '../logic/data.js';
 import { distanceM, HERE_M } from '../logic/spot.js';
 
@@ -26,15 +26,16 @@ export default function VanTile({ onDone }) {
   });
   if (spot === undefined) return null;
 
+  const accent = sectionAccent('furgone-qui');
   let tile;
   if (!spot) {
-    tile = html`<${Tile} wide icon="circle-parking" label=${t('furgone-qui.here')}
+    tile = html`<${Tile} wide icon="circle-parking" accent=${accent} label=${t('furgone-qui.here')}
       value=${t(save.busy ? 'furgone-qui.saving' : 'furgone-qui.tile.hint')} onClick=${save.run} />`;
   } else {
     const d = fix && clock.now() - fix.ts <= FRESH_FIX_MS ? distanceM(spot, fix) : null;
     const label = d === null ? t('furgone-qui.noDist')
       : d <= HERE_M ? t('furgone-qui.atHere') : t('furgone-qui.at', { dist: format.distance(d) });
-    tile = html`<${Tile} wide icon="circle-parking" label=${label}
+    tile = html`<${Tile} wide icon="circle-parking" accent=${accent} label=${label}
       value=${t('furgone-qui.savedAt', { time: format.time(spot.at) })} href=${router.href('/furgone-qui')} />`;
   }
   return html`<div class="tiles f-furgone-qui-tile">${tile}</div>`;

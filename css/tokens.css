@@ -96,6 +96,18 @@
   --tone-access: #C9A8FF;  --on-tone-access: #050B1C;  --tone-access-text: #C9A8FF;  --tone-access-soft: rgba(201, 168, 255, .16);
   --tone-success: #6FE0A8; --on-tone-success: #050B1C; --tone-success-text: #6FE0A8; --tone-success-soft: rgba(111, 224, 168, .14);
   --tone-neutral: #C4D7FF; --on-tone-neutral: #050B1C; --tone-neutral-text: #C4D7FF; --tone-neutral-soft: rgba(196, 215, 255, .12);
+
+  /* Section accents: one per section, chosen once in ui/kit/accent.js. The colour draws the icon and
+     the small label; -soft fills the icon badge, -wash is the corner glow of a tile or card, -line
+     tints its hairline. */
+  --accent-blue: #8FB2FF;    --accent-blue-soft: rgba(143, 178, 255, .16);    --accent-blue-wash: rgba(143, 178, 255, .11);    --accent-blue-line: rgba(143, 178, 255, .30);
+  --accent-cyan: #7FD8FF;    --accent-cyan-soft: rgba(127, 216, 255, .15);    --accent-cyan-wash: rgba(127, 216, 255, .10);    --accent-cyan-line: rgba(127, 216, 255, .28);
+  --accent-mint: #6FE0A8;    --accent-mint-soft: rgba(111, 224, 168, .15);    --accent-mint-wash: rgba(111, 224, 168, .10);    --accent-mint-line: rgba(111, 224, 168, .28);
+  --accent-amber: #FFB020;   --accent-amber-soft: rgba(255, 176, 32, .15);    --accent-amber-wash: rgba(255, 176, 32, .09);    --accent-amber-line: rgba(255, 176, 32, .28);
+  --accent-violet: #C9A8FF;  --accent-violet-soft: rgba(201, 168, 255, .16);  --accent-violet-wash: rgba(201, 168, 255, .11);  --accent-violet-line: rgba(201, 168, 255, .30);
+  --accent-coral: #FF8A7A;   --accent-coral-soft: rgba(255, 138, 122, .16);   --accent-coral-wash: rgba(255, 138, 122, .10);   --accent-coral-line: rgba(255, 138, 122, .30);
+  --accent-pink: #FF9BD2;    --accent-pink-soft: rgba(255, 155, 210, .16);    --accent-pink-wash: rgba(255, 155, 210, .10);    --accent-pink-line: rgba(255, 155, 210, .30);
+  --accent-neutral: #C4D7FF; --accent-neutral-soft: rgba(196, 215, 255, .12); --accent-neutral-wash: rgba(196, 215, 255, 0);   --accent-neutral-line: rgba(255, 255, 255, .14);
 }
 
 /* ---------- light: paper and ink ---------- */
@@ -126,6 +138,16 @@
   --tone-access: #5A2DB0;  --on-tone-access: #FFFFFF;  --tone-access-text: #5A2DB0;  --tone-access-soft: #EDE5FA;
   --tone-success: #0A6540; --on-tone-success: #FFFFFF; --tone-success-text: #0A6540; --tone-success-soft: #DCF2E6;
   --tone-neutral: #2E343B; --on-tone-neutral: #FFFFFF; --tone-neutral-text: #2E343B; --tone-neutral-soft: #E8E8E3;
+
+  /* Section accents, tuned for paper: deeper colours, 4.5:1 or more as text and on their own badge. */
+  --accent-blue: #2F5DA8;    --accent-blue-soft: rgba(47, 93, 168, .12);    --accent-blue-wash: rgba(47, 93, 168, .07);    --accent-blue-line: rgba(47, 93, 168, .30);
+  --accent-cyan: #0B6A8C;    --accent-cyan-soft: rgba(11, 106, 140, .12);   --accent-cyan-wash: rgba(11, 106, 140, .07);   --accent-cyan-line: rgba(11, 106, 140, .30);
+  --accent-mint: #0A6540;    --accent-mint-soft: rgba(10, 101, 64, .12);    --accent-mint-wash: rgba(10, 101, 64, .07);    --accent-mint-line: rgba(10, 101, 64, .30);
+  --accent-amber: #8A5300;   --accent-amber-soft: rgba(196, 122, 0, .16);   --accent-amber-wash: rgba(196, 122, 0, .08);   --accent-amber-line: rgba(138, 83, 0, .32);
+  --accent-violet: #5A2DB0;  --accent-violet-soft: rgba(90, 45, 176, .11);  --accent-violet-wash: rgba(90, 45, 176, .06);  --accent-violet-line: rgba(90, 45, 176, .28);
+  --accent-coral: #B03A22;   --accent-coral-soft: rgba(176, 58, 34, .12);   --accent-coral-wash: rgba(176, 58, 34, .07);   --accent-coral-line: rgba(176, 58, 34, .30);
+  --accent-pink: #A8246F;    --accent-pink-soft: rgba(168, 36, 111, .11);   --accent-pink-wash: rgba(168, 36, 111, .06);   --accent-pink-line: rgba(168, 36, 111, .28);
+  --accent-neutral: #2E343B; --accent-neutral-soft: rgba(46, 52, 59, .09);  --accent-neutral-wash: rgba(46, 52, 59, 0);    --accent-neutral-line: rgba(22, 25, 29, .12);
 }
 
 /* ---------- high contrast ("sole"): black on white, 2 px lines, no brand colour ---------- */
@@ -155,6 +177,16 @@
   --tone-access: #441199;  --on-tone-access: #FFFFFF;  --tone-access-text: #441199;  --tone-access-soft: #FFFFFF;
   --tone-success: #004422; --on-tone-success: #FFFFFF; --tone-success-text: #004422; --tone-success-soft: #FFFFFF;
   --tone-neutral: #000000; --on-tone-neutral: #FFFFFF; --tone-neutral-text: #000000; --tone-neutral-soft: #FFFFFF;
+
+  /* Section accents: no tints here. Every section is black on white, told apart by icon and word. */
+  --accent-blue: #000000;    --accent-blue-soft: #FFFFFF;    --accent-blue-wash: rgba(255, 255, 255, 0);    --accent-blue-line: #000000;
+  --accent-cyan: #000000;    --accent-cyan-soft: #FFFFFF;    --accent-cyan-wash: rgba(255, 255, 255, 0);    --accent-cyan-line: #000000;
+  --accent-mint: #000000;    --accent-mint-soft: #FFFFFF;    --accent-mint-wash: rgba(255, 255, 255, 0);    --accent-mint-line: #000000;
+  --accent-amber: #000000;   --accent-amber-soft: #FFFFFF;   --accent-amber-wash: rgba(255, 255, 255, 0);   --accent-amber-line: #000000;
+  --accent-violet: #000000;  --accent-violet-soft: #FFFFFF;  --accent-violet-wash: rgba(255, 255, 255, 0);  --accent-violet-line: #000000;
+  --accent-coral: #000000;   --accent-coral-soft: #FFFFFF;   --accent-coral-wash: rgba(255, 255, 255, 0);   --accent-coral-line: #000000;
+  --accent-pink: #000000;    --accent-pink-soft: #FFFFFF;    --accent-pink-wash: rgba(255, 255, 255, 0);    --accent-pink-line: #000000;
+  --accent-neutral: #000000; --accent-neutral-soft: #FFFFFF; --accent-neutral-wash: rgba(255, 255, 255, 0); --accent-neutral-line: #000000;
 }
 
 /* System "increase contrast" inside light or dark: thicker lines, no tertiary grey */
@@ -169,3 +201,15 @@
 [data-tone="access"]  { --tone: var(--tone-access);  --on-tone: var(--on-tone-access);  --tone-text: var(--tone-access-text);  --tone-soft: var(--tone-access-soft); }
 [data-tone="success"] { --tone: var(--tone-success); --on-tone: var(--on-tone-success); --tone-text: var(--tone-success-text); --tone-soft: var(--tone-success-soft); }
 :root, [data-tone="neutral"] { --tone: var(--tone-neutral); --on-tone: var(--on-tone-neutral); --tone-text: var(--tone-neutral-text); --tone-soft: var(--tone-neutral-soft); }
+
+/* Section accent scoping: put data-accent on a tile, card, row, tab or icon badge. Outside any
+   scope a badge takes the brand accent and nothing is washed. */
+:root { --section: var(--accent-text); --section-soft: var(--accent-soft); --section-wash: transparent; --section-line: var(--border); }
+[data-accent="blue"]    { --section: var(--accent-blue);    --section-soft: var(--accent-blue-soft);    --section-wash: var(--accent-blue-wash);    --section-line: var(--accent-blue-line); }
+[data-accent="cyan"]    { --section: var(--accent-cyan);    --section-soft: var(--accent-cyan-soft);    --section-wash: var(--accent-cyan-wash);    --section-line: var(--accent-cyan-line); }
+[data-accent="mint"]    { --section: var(--accent-mint);    --section-soft: var(--accent-mint-soft);    --section-wash: var(--accent-mint-wash);    --section-line: var(--accent-mint-line); }
+[data-accent="amber"]   { --section: var(--accent-amber);   --section-soft: var(--accent-amber-soft);   --section-wash: var(--accent-amber-wash);   --section-line: var(--accent-amber-line); }
+[data-accent="violet"]  { --section: var(--accent-violet);  --section-soft: var(--accent-violet-soft);  --section-wash: var(--accent-violet-wash);  --section-line: var(--accent-violet-line); }
+[data-accent="coral"]   { --section: var(--accent-coral);   --section-soft: var(--accent-coral-soft);   --section-wash: var(--accent-coral-wash);   --section-line: var(--accent-coral-line); }
+[data-accent="pink"]    { --section: var(--accent-pink);    --section-soft: var(--accent-pink-soft);    --section-wash: var(--accent-pink-wash);    --section-line: var(--accent-pink-line); }
+[data-accent="neutral"] { --section: var(--accent-neutral); --section-soft: var(--accent-neutral-soft); --section-wash: var(--accent-neutral-wash); --section-line: var(--accent-neutral-line); }

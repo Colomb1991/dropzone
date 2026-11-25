@@ -41,7 +41,7 @@ export default function InvitaScreen() {
     ));
   };
 
-  return html`<${Screen} title=${t('invita.title')} back="/altro">
+  return html`<${Screen} title=${t('invita.title')} icon="share-2" back="/altro">
     <div class="f-invita">
       <p class="t-body-m">${t(qr ? 'invita.scan' : 'invita.noQr')}</p>
       ${qr && html`<div class="f-invita-qr">

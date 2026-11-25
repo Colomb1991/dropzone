@@ -11,13 +11,14 @@ export function List({ children, label }) {
 }
 
 /**
- * @param {{icon?:string, tone?:string, title:string, sub?:string, value?:string,
+ * @param {{icon?:string, tone?:string, accent?:string|null, title:string, sub?:string, value?:string,
  *   tags?:{label:string, tone?:string, icon?:string}[], thumbId?:string, chevron?:boolean, selected?:boolean,
  *   dim?:boolean, href?:string, external?:boolean, onClick?:(e:Event)=>void, trailing?:any,
- *   disabled?:boolean}} props
+ *   disabled?:boolean}} props  `accent`: the section the row opens (ui/kit/accent.js); its icon
+ *   sits in a badge of that colour
  */
 export function ListRow(props) {
-  const { icon, tone, title, sub, value, tags, thumbId, chevron, selected, dim, href, external, onClick,
+  const { icon, tone, accent, title, sub, value, tags, thumbId, chevron, selected, dim, href, external, onClick,
     trailing, disabled } = props;
   const lead = thumbId
     ? html`<${Thumb} mediaId=${thumbId} size=${40} />`
@@ -40,7 +41,8 @@ export function ListRow(props) {
       ${trailing}
       ${chevron && html`<${Icon} name="chevron-right" />`}
     </span>`;
-  const common = { class: cls, 'data-tone': tone ?? null, 'aria-selected': selected === undefined ? null : String(selected) };
+  const common = { class: cls, 'data-tone': tone ?? null, 'data-accent': lead && !thumbId ? (accent ?? null) : null,
+    'aria-selected': selected === undefined ? null : String(selected) };
   if (href && tappable) {
     return html`<a ...${common} href=${href} target=${external ? '_blank' : null}
       rel=${external ? 'noopener noreferrer' : null} onClick=${onClick}>${body}</a>`;

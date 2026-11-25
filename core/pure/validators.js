@@ -128,12 +128,14 @@ export function validateShift(rec) {
     const br = { startAt: b.startAt, endAt: bEnd, plannedMin: Number.isFinite(b.plannedMin) ? b.plannedMin : 30 };
     breaks.push(b.auto === true ? { ...br, auto: true } : br);
   }
-  return {
+  const shift = {
     id: rec.id, startAt: rec.startAt, endAt, mode: rec.mode === 'pocket' ? 'pocket' : 'holder', breaks,
     edited: rec.edited === true,
     alertsFired: Number.isInteger(rec.alertsFired) && rec.alertsFired > 0 ? rec.alertsFired : 0,
     lastSeenAt: isTs(rec.lastSeenAt) ? rec.lastSeenAt : rec.startAt,
   };
+  // Added by hand in "Ore" (a day marked as worked): the mark is kept, records without it stay as they are.
+  return rec.manual === true ? { ...shift, manual: true } : shift;
 }
 
 export function validateSettingRecord(rec) {

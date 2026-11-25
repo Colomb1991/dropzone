@@ -2,7 +2,7 @@
 import { html, useEffect, useState } from '../../../ui/html.js';
 import { useSetting, useLive, useAction } from '../../../ui/hooks.js';
 import {
-  Screen, Button, Sheet, Chips, Chip, Stepper, Toggle, List, ListRow, Icon,
+  Screen, Button, Sheet, Chips, Chip, Stepper, Toggle, List, ListRow, Icon, sectionAccent,
 } from '../../../ui/kit/index.js';
 import { t, tn, settings, slots, router, format } from '../../../core/api.js';
 import { shiftStats, closing, validWeeklyHours } from '../logic/shift-math.js';
@@ -96,7 +96,8 @@ export function EndCard({ shift, onDone }) {
       ${shift.alertsFired > 0 && line('bell-ring', tn('turno.done.alerts', shift.alertsFired, { n: shift.alertsFired }))}
       ${autoLock && line('lock', t('turno.done.autolock'))}
       ${rows.length > 0 && html`<${List}>
-        ${rows.map((x) => html`<${ListRow} icon=${x.icon ?? 'info'} title=${x.text} chevron=${Boolean(x.to)}
+        ${rows.map((x) => html`<${ListRow} icon=${x.icon ?? 'info'} accent=${sectionAccent(x.featureId)} title=${x.text}
+          chevron=${Boolean(x.to)}
           href=${x.to ? router.href(x.to) : undefined} />`)}
       <//>`}
       <p class="t-title-m">${t(`turno.done.${closing(s.inShiftMs)}`)}</p>

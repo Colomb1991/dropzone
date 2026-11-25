@@ -25,7 +25,7 @@ This data is saved in your phone's browser storage. We cannot see it, copy it or
 - **Alerts already given:** for each note, the time of the last alert. Someone who reads this data can tell when you last passed there.
 - **Van diary:** photos with date, time and position written on them; the van checks you tick, with the time; and your own list of checks, if you change it. They stay until you delete them and go into the backup. If you leave the van photos out of the backup, the checks saved with those photos stay out too.
 - **Alerts** you created or received.
-- **Route:** the stops you add (an address or a point, with a short label if you write one), their order, which ones you have done and the time of the last one done. The route deletes itself 24 hours after its last change and is not in the backup.
+- **Route:** the stops you add (an address or a point, with a short label if you write one), their order, which ones you have done, the time of the last one done and today's town, if you set it. From a text you scan, dictate or paste the app keeps only the addresses it recognises in it (street, number, town) and shows them to you before adding them: the whole text is not saved. The route deletes itself 24 hours after its last change and is not in the backup.
 - **Addresses the route planner learns:** when you tap "Done" in front of an address, its text and the point measured by your phone (never the coordinates of the search service), how many times and the date and time of the last one. Someone who reads this data can tell when you were last there.
 - **Times the route planner learns:** the average time between one stop and the next: the duration only, never the path. For pairs of areas of about 5 km and time of day, with how many times and the date and time of the last one.
 - Learned addresses and times stay until you use Delete everything and go into the backup.
@@ -70,8 +70,8 @@ Only the requests below, to the app's site and to five addresses: tiles.openfree
 
 **Route planner address search (Photon, by komoot, OpenStreetMap data)**
 
-- When: while you type an address in the route planner, at every short pause, even if the phone has already learned it; and for each line of a pasted list that the phone has not already learned. Only after you have turned the search on: it is off until you do.
-- What it receives: the text you type, even half-written, or paste, and your area approximated to about 10 km. Never the exact point. A pasted list is sent one line at a time.
+- When: while you type an address in the route planner, at every short pause, even if the phone has already learned it; and for each address recognised in a text you scan, dictate or paste, when the phone has not already learned it. Only after you have turned the search on: it is off until you do.
+- What it receives: the text you type in "Search", even half-written; of what you scan, dictate or paste only the addresses recognised (or the line you fix by hand), one at a time; and your area approximated to about 10 km. Never the exact point.
 - Photon publishes no privacy notice of its own: we do not know what it logs. Type street, number and town only: never names.
 - Switching it off: "Online address search". The addresses the phone has learned, "Add here", coordinates and your notes still work.
 - [Photon](https://photon.komoot.io/)
@@ -106,7 +106,7 @@ From there on, the rules of those apps and of the recipient apply. We see none o
 ## 5. Phone permissions
 
 - **Location:** used to warn you near your notes, to find nearby places, to save the point of a note or van photo, to sort the route and learn entrances, to remember where you left the van, for the shift weather and the address search (the rounded area only), and for SOS. It works only with the app open and the screen on. It stays on the phone, except as described in sections 3 and 4.
-- **Camera:** only when you tap "Take photo". {{APP_NAME}} keeps its copy on the phone. If your phone's camera also saves one to the gallery, that copy follows the phone's rules.
+- **Camera:** only when you tap "Take photo". {{APP_NAME}} keeps its copy on the phone. If your phone's camera also saves one to the gallery, that copy follows the phone's rules. In the route planner labels are read by the "Scan text" of the phone's keyboard (Apple, Google or others), under its own rules: {{APP_NAME}} receives the text only, never the image.
 - **Microphone:** {{APP_NAME}} does not use it and does not turn voice into text. If you dictate a note with the keyboard's microphone, the keyboard (Apple, Google or others) handles your voice under its own rules.
 - **Clipboard:** only when you tap "Paste alert" or, in the route planner, "Paste from clipboard".
 

@@ -7,8 +7,11 @@ import {
   canLearnDoor, learnDoor, validateDoorPoint, legSample, addLegSample, removeLegSample, validateLegTime,
 } from './learn.js';
 import { photonSuggestions } from './address.js';
+import { cleanTown } from './extract.js';
 
 const STORES = ['route', 'doorPoints', 'legTimes'];
+/** "Città di oggi": one record of the shared `kv` store (never in a backup). */
+const TOWN_KEY = 'giro.town';
 /** A fix this recent is "where the courier is now". */
 const FRESH_FIX_MS = 20000;
 
@@ -41,7 +44,30 @@ export async function loadRoute() {
 
 /** Boot: a route older than 24 hours leaves the phone even if nobody opens the planner. */
 export function purgeExpired() {
-  return loadRoute().then(() => undefined, (err) => log.error('giro', err));
+  return loadRoute().then(loadTown).then(() => undefined, (err) => log.error('giro', err));
+}
+
+/**
+ * "Città di oggi": the town given to the addresses that name none. It lives as long as the route, or
+ * 24 hours when no stop has been added yet, and goes with "Svuota giro".
+ * @returns {Promise<string>} '' when not set
+ */
+export async function loadTown() {
+  const now = clock.now();
+  const rec = await db.get('kv', TOWN_KEY);
+  if (!rec) return '';
+  const town = cleanTown(rec.town);
+  const fresh = rec.at > 0 && now - rec.at <= R.ROUTE_TTL_MS;
+  if (town && (fresh || live(await db.get('route', R.ROUTE_ID), now))) return town;
+  await db.del('kv', TOWN_KEY);
+  return '';
+}
+
+/** @param {string} text an empty text forgets the town @returns {Promise<void>} */
+export async function saveTown(text) {
+  const town = cleanTown(text);
+  if (town) await db.put('kv', { key: TOWN_KEY, town, at: clock.now() });
+  else await db.del('kv', TOWN_KEY);
 }
 
 /**
@@ -98,9 +124,12 @@ export function sortRoute(start) {
   });
 }
 
-/** "Svuota giro": the stops go, what the app has learned stays. */
+/** "Svuota giro": the stops and the town of today go, what the app has learned stays. */
 export function clearRoute() {
-  return db.del('route', R.ROUTE_ID);
+  return db.tx(['route', 'kv'], 'rw', async (t) => {
+    await t.del('route', R.ROUTE_ID);
+    await t.del('kv', TOWN_KEY);
+  });
 }
 
 async function learnInTx(t, stop, fix, now) {

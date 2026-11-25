@@ -25,7 +25,7 @@ Questi dati sono salvati nella memoria del browser del tuo telefono. Noi non pos
 - **Avvisi già dati:** per ogni nota, l'ora dell'ultimo avviso. Chi legge questi dati capisce quando sei passato di lì l'ultima volta.
 - **Diario furgone:** foto con data, ora e posizione scritte sopra; i controlli del furgone che spunti, con l'ora; e il tuo elenco di controlli, se lo cambi. Restano finché non li elimini ed entrano nel backup. Se lasci fuori dal backup le foto del furgone, restano fuori anche i controlli salvati insieme a quelle foto.
 - **Segnalazioni** create o ricevute.
-- **Giro:** le fermate che aggiungi (un indirizzo o un punto, con un'etichetta breve se la scrivi), il loro ordine, quali hai fatto e l'ora dell'ultima fatta. Il giro si cancella da solo 24 ore dopo l'ultima modifica e non entra nel backup.
+- **Giro:** le fermate che aggiungi (un indirizzo o un punto, con un'etichetta breve se la scrivi), il loro ordine, quali hai fatto, l'ora dell'ultima fatta e la città di oggi, se la scrivi. Di un testo che scansioni, detti o incolli l'app tiene solo gli indirizzi che ci riconosce (via, numero, città) e te li mostra prima di aggiungerli: il testo intero non viene salvato. Il giro si cancella da solo 24 ore dopo l'ultima modifica e non entra nel backup.
 - **Indirizzi imparati dal Giro:** quando tocchi "Fatto" davanti a un indirizzo, il suo testo e il punto misurato dal tuo telefono (mai le coordinate del servizio di ricerca), quante volte e la data e l'ora dell'ultima. Chi legge questi dati capisce quando ci sei passato l'ultima volta.
 - **Tempi imparati dal Giro:** il tempo medio tra una fermata e la successiva: solo la durata, mai il percorso. Per coppie di zone di circa 5 km e fascia oraria, con quante volte e la data e l'ora dell'ultima.
 - Indirizzi e tempi imparati restano finché non usi Elimina tutto ed entrano nel backup.
@@ -70,8 +70,8 @@ Solo le richieste qui sotto, verso il sito dell'app e cinque indirizzi: tiles.op
 
 **Ricerca indirizzi del Giro (Photon, di komoot, dati OpenStreetMap)**
 
-- Quando: mentre scrivi un indirizzo nel Giro, a ogni breve pausa, anche se il telefono lo ha già imparato; e per ogni riga di un elenco incollato che il telefono non ha già imparato. Solo dopo che hai attivato la ricerca: è spenta finché non lo fai tu.
-- Cosa riceve: il testo che scrivi, anche a metà, o che incolli, e la tua zona approssimata a circa 10 km. Mai il punto esatto. Un elenco incollato parte una riga alla volta.
+- Quando: mentre scrivi un indirizzo nel Giro, a ogni breve pausa, anche se il telefono lo ha già imparato; e per ogni indirizzo riconosciuto in un testo che scansioni, detti o incolli, se il telefono non lo ha già imparato. Solo dopo che hai attivato la ricerca: è spenta finché non lo fai tu.
+- Cosa riceve: il testo che scrivi in "Cerca", anche a metà; di quello che scansioni, detti o incolli solo gli indirizzi riconosciuti (o la riga che correggi a mano), uno alla volta; e la tua zona approssimata a circa 10 km. Mai il punto esatto.
 - Photon non pubblica una sua informativa privacy: non sappiamo cosa registra. Scrivi solo via, numero e città: mai nomi.
 - Spegnerlo: "Ricerca indirizzi online". Restano gli indirizzi che il telefono ha imparato, "Aggiungi qui", le coordinate e le tue note.
 - [Photon](https://photon.komoot.io/)
@@ -106,7 +106,7 @@ Da lì in poi valgono le regole di quelle app e di chi riceve. Noi non vediamo n
 ## 5. Permessi del telefono
 
 - **Posizione:** serve per avvisarti vicino alle tue note, per i posti vicini, per salvare il punto di una nota o di una foto del furgone, per ordinare il Giro e imparare gli ingressi, per ricordare dove hai lasciato il furgone, per il meteo del turno e la ricerca indirizzi (solo la zona arrotondata) e per l'SOS. Funziona solo con l'app aperta e lo schermo acceso. Resta sul telefono, tranne i casi delle sezioni 3 e 4.
-- **Fotocamera:** solo quando tocchi "Scatta foto". {{APP_NAME}} tiene la sua copia sul telefono. Se la fotocamera del tuo telefono ne salva una anche nella galleria, quella segue le regole del telefono.
+- **Fotocamera:** solo quando tocchi "Scatta foto". {{APP_NAME}} tiene la sua copia sul telefono. Se la fotocamera del tuo telefono ne salva una anche nella galleria, quella segue le regole del telefono. Nel Giro le etichette le legge "Scansiona testo" della tastiera del telefono (Apple, Google o altri), con le sue regole: {{APP_NAME}} riceve solo il testo, mai l'immagine.
 - **Microfono:** {{APP_NAME}} non lo usa e non trasforma la voce in testo. Se detti una nota con il microfono della tastiera, la voce la gestisce la tastiera (Apple, Google o altri) con le sue regole.
 - **Appunti:** solo quando tocchi "Incolla segnalazione" o, nel Giro, "Incolla dagli appunti".
 

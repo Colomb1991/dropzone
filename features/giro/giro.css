@@ -53,7 +53,18 @@
 .f-giro-modes { display: flex; gap: var(--sp-2); overflow-x: auto; margin: 0 calc(var(--sp-4) * -1); padding: 0 var(--sp-4) var(--sp-1); scrollbar-width: none; }
 .f-giro-modes::-webkit-scrollbar { display: none; }
 .f-giro-modes .chip { flex: none; white-space: nowrap; }
-.f-giro-paste textarea { min-height: 176px; }
+/* The box of "Scansiona" stays whole above the keyboard of a small phone; a pasted list gets more room. */
+.f-giro-box textarea { min-height: 176px; }
+.f-giro-box--scan textarea { min-height: 136px; }
+.f-giro-how { display: grid; gap: var(--sp-1); margin: 0; padding: 0; list-style: none; }
+.f-giro-how li { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: var(--sp-2); font-size: var(--fs-body-m); line-height: var(--lh-body-m); color: var(--text-2); }
+.f-giro-how .icon { width: 20px; height: 20px; margin-top: 2px; color: var(--accent-text); }
+/* A row to tick with its pencil: the row is the checkbox, the pencil opens the correction. */
+.f-giro-pick { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.f-giro-pick > .row { padding-right: var(--sp-2); }
+.f-giro-pick > .row .row__title { overflow-wrap: anywhere; }
+.f-giro-pick > .btn { margin-right: var(--sp-2); }
+li + li > .f-giro-pick::before { content: ""; position: absolute; inset: 0 var(--sp-4) auto; height: var(--border-w); background: var(--border); }
 .f-giro-result { display: grid; gap: var(--sp-2); padding: var(--sp-4); background: var(--surface); border: var(--border-w) solid var(--border); border-radius: var(--r-lg); }
 .f-giro-result p { margin: 0; }
 .f-giro-result__line { display: flex; align-items: center; gap: var(--sp-2); font-weight: var(--fw-strong); }

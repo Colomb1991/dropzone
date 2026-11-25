@@ -24,7 +24,9 @@
  *   auto?:boolean          // closed by the app at its planned end
  * }} ShiftBreak */
 /** @typedef {{id:string, startAt:number, endAt:number|null, mode:'holder'|'pocket', breaks:ShiftBreak[],
- *   edited:boolean, alertsFired:number, lastSeenAt:number}} Shift */
+ *   edited:boolean, alertsFired:number, lastSeenAt:number,
+ *   manual?:boolean        // added by hand in "Ore", not recorded by a shift
+ * }} Shift */
 
 /** @typedef {{id:string, source:string, lat:number, lon:number,
  *   cls:'approach'|'stop'|'none',

@@ -46,6 +46,15 @@ a { color: var(--accent-text); text-underline-offset: 3px; }
 [data-theme="hc"] .icon--lg, [data-theme="hc"] .icon--xl { stroke-width: 2.25; }
 [data-theme="hc"] .icon--hero { stroke-width: 1.9; }
 
+/* ---------- icon badge: the colour of a section (tokens.css, --accent-*) ---------- */
+.badge { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: var(--r-md); background: var(--section-soft); color: var(--section); }
+.badge > .icon { width: 22px; height: 22px; }
+.badge--sm { width: 32px; height: 32px; border-radius: var(--r-sm); }
+.badge--sm > .icon { width: 18px; height: 18px; }
+.badge--lg { width: 44px; height: 44px; }
+.badge--lg > .icon { width: 24px; height: 24px; }
+[data-theme="hc"] .badge { background: transparent; border: 2px solid currentColor; }
+
 /* ---------- buttons: pills ---------- */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
@@ -101,6 +110,9 @@ a { color: var(--accent-text); text-underline-offset: 3px; }
 .tile__value { font-size: var(--fs-caption); font-weight: var(--fw-body); color: var(--text-2); }
 .tile--primary .tile__value { color: inherit; }
 .tile:disabled, .tile[aria-disabled="true"] { background: var(--surface-2); color: var(--text-3); box-shadow: none; cursor: not-allowed; transform: none; }
+/* A tile that opens a section: a soft wash of its accent in one corner and a tinted hairline. One
+   accent per tile; the label stays in the text colour. */
+.tile[data-accent] { border-color: var(--section-line); background-image: radial-gradient(120% 95% at 100% 0%, var(--section-wash), transparent 64%); }
 
 /* ---------- card: glass ---------- */
 .card {
@@ -127,6 +139,10 @@ a { color: var(--accent-text); text-underline-offset: 3px; }
 .card[data-tone] .card__title .icon { color: var(--tone-text); }
 .card--action { display: block; width: 100%; text-align: left; text-decoration: none; cursor: pointer; }
 .card--action:active { background: var(--surface-2); }
+/* A card of a section: the same wash and hairline as its tile, label and icon in the accent. */
+.card[data-accent] { border-color: var(--section-line); background-image: radial-gradient(110% 120% at 100% 0%, var(--section-wash), transparent 62%); }
+.card[data-accent] .card__title:not(:only-child) { color: var(--section); }
+.card[data-accent] .card__title .icon { color: var(--section); }
 .card--stat .card__value { font-family: var(--font-display); font-size: var(--fs-display-l); line-height: var(--lh-display-l); font-weight: var(--fw-display); letter-spacing: var(--ls-display); font-variant-numeric: tabular-nums; }
 
 /* ---------- list row ---------- */
@@ -143,6 +159,9 @@ a { color: var(--accent-text); text-underline-offset: 3px; }
 /* The leading icon stands bare in its tone colour; the filled disc is kept for "selected". */
 .row__disc { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: transparent; color: var(--tone-text); }
 .row__disc .icon { width: 26px; height: 26px; stroke-width: 1.9; }
+/* A row that opens a section: its icon in a badge of that section's accent. */
+.row[data-accent] .row__disc { border-radius: var(--r-md); background: var(--section-soft); color: var(--section); }
+.row[data-accent] .row__disc .icon { width: 22px; height: 22px; }
 [data-theme="hc"] .row__disc { border: 2px solid var(--tone-text); }
 [data-theme="hc"] .row__disc .icon { width: 24px; height: 24px; stroke-width: 2.5; }
 .row[aria-selected="true"] .row__disc { background: var(--primary-fill); color: var(--on-primary); border-color: transparent; }
@@ -172,6 +191,9 @@ a { color: var(--accent-text); text-underline-offset: 3px; }
 .nav__pill { position: relative; display: grid; place-items: center; width: 64px; height: 32px; border-radius: var(--r-pill); transition: background-color var(--dur-1) linear; }
 .nav__item[aria-current="page"] { color: var(--accent-text); font-weight: var(--fw-bold); }
 .nav__item[aria-current="page"] .nav__pill { background: var(--accent-soft); }
+/* The open tab wears the accent of its section. */
+.nav__item[data-accent][aria-current="page"] { color: var(--section); }
+.nav__item[data-accent][aria-current="page"] .nav__pill { background: var(--section-soft); }
 [data-theme="hc"] .nav__item[aria-current="page"] .nav__pill { background: var(--primary); color: var(--on-primary); }
 .nav__item:active .nav__pill { background: var(--surface-2); }
 .nav__badge { position: absolute; top: 0; right: 10px; width: 12px; height: 12px; border-radius: 50%; background: var(--tone-danger); box-shadow: 0 0 0 2px var(--nav-fill); }

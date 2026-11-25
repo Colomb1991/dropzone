@@ -5,6 +5,7 @@ import * as backup from '../../core/data/backup.js';
 import { t } from '../../core/i18n.js';
 import { useStore, useTick } from '../hooks.js';
 import { Icon } from '../kit/icon.js';
+import { sectionAccent } from '../kit/accent.js';
 
 export const MORE_PATH = '/altro';
 
@@ -36,7 +37,9 @@ export function Nav({ tabs, route, locked, hidden }) {
       } catch (err) {
         badge = false;
       }
+      // The open tab wears the colour of its section; a tab with a tone (SOS) keeps the tone.
       return html`<a class="nav__item" href=${router.href(n.to)} data-tone=${n.tone ?? null}
+        data-accent=${n.tone ? null : sectionAccent(n.featureId)}
         aria-current=${active === n.to ? 'page' : null} aria-disabled=${off ? 'true' : null} inert=${off}>
         <span class="nav__pill">
           <${Icon} name=${n.icon} />

@@ -1,8 +1,8 @@
 // @ts-check
 // The only importer of vendor/preact and vendor/htm.
-import { h, render, Fragment, createPortal } from '../vendor/preact/preact.mjs';
+import { h, render, Fragment, createPortal, createContext } from '../vendor/preact/preact.mjs';
 import {
-  useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, useErrorBoundary,
+  useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, useErrorBoundary, useContext,
 } from '../vendor/preact/hooks.mjs';
 import htm from '../vendor/htm/htm.mjs';
 
@@ -10,6 +10,6 @@ import htm from '../vendor/htm/htm.mjs';
 export const html = htm.bind(h);
 
 export {
-  h, render, Fragment, createPortal,
-  useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, useErrorBoundary,
+  h, render, Fragment, createPortal, createContext,
+  useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, useErrorBoundary, useContext,
 };
