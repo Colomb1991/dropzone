@@ -6,7 +6,9 @@ import { Screen, Tiles, Tile, List, ListRow, Button, Field, Empty, toast } from 
 import { t, clock, geo, store, speech, cues, format, clipboard, AppError } from '../../../core/api.js';
 import { ALERT_TYPES, alertType, alertTypeKey } from '../../../core/pure/catalog.js';
 import { decodeAlert, extractAlertFragment } from '../logic/alert-link.js';
-import { listActive, createAlert, addReceived, removeAlert, takeCaptured } from '../alerts.js';
+import {
+  listActive, createAlert, addReceived, removeAlert, takeCaptured, freshFix, FRESH_FIX_MS,
+} from '../alerts.js';
 import { SendSheet } from './send-sheet.js';
 
 /** Adds the alert found in pasted text. Shared with the viewer's "Aggiungi alla mia mappa". */
@@ -29,7 +31,8 @@ export default function SegnalaScreen() {
 
   const create = useAction(async (type) => {
     const at = clock.now();
-    const pos = takeCaptured() ?? geo.lastFix() ?? await geo.currentPosition();
+    // Never an old fix: the alert tells colleagues where the problem is.
+    const pos = takeCaptured() ?? freshFix(at) ?? await geo.currentPosition({ maxAgeMs: FRESH_FIX_MS });
     if (!pos) throw new AppError('no-position', 'segnala.err.noPosition');
     const alert = await createAlert({ type, lat: pos.lat, lon: pos.lon, at });
     cues.playCue('saved');

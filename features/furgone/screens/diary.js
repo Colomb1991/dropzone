@@ -106,8 +106,11 @@ function HistorySheet({ session, onClose }) {
     const ok = await confirm({ icon: 'trash-2', danger: true, title: t('furgone.deleteTitle'),
       text: t('furgone.deleteText'), confirm: t('core.action.delete'), cancel: t('furgone.deleteKeep') });
     if (!ok) return;
-    for (const p of session.photos) await media.deleteMedia(p.mediaId);
-    await db.del('van', session.id);
+    // One transaction: no diary record is left pointing at deleted photos.
+    await db.tx(['media', 'van'], 'rw', async (tx) => {
+      for (const p of session.photos) await tx.del('media', p.mediaId);
+      await tx.del('van', session.id);
+    });
     toast(t('furgone.deleted'));
     onClose();
   };
@@ -172,13 +175,19 @@ export default function VanDiary() {
       const stamp = stampText({ at, lat: fix?.lat, lon: fix?.lon, acc: fix?.acc, label: t(`furgone.label.${label}`),
         noPosition: t('furgone.noPosition') });
       const out = await photo.processPhoto(file, { ...photo.PHOTO_VAN, stamp });
-      const mediaId = await media.putMedia({ kind: 'van', mime: out.mime, bytes: out.bytes, w: out.w, h: out.h });
-      const latest = validateVan(await db.get('van', base.id)) ?? base;
-      const res = addPhoto(latest, { label, mediaId, bytes: out.bytes.byteLength, at }, fix);
-      const rec = validateVan(res.session);
-      if (!rec || res.session === latest) throw new AppError('van-invalid', 'core.err.save');
-      await db.put('van', rec);
-      if (res.replaced) await media.deleteMedia(res.replaced);
+      const mediaId = crypto.randomUUID();
+      // One transaction: a photo is never stored without its diary record, nor the record without it.
+      const rec = await db.tx(['media', 'van'], 'rw', async (tx) => {
+        const latest = validateVan(await tx.get('van', base.id)) ?? base;
+        const res = addPhoto(latest, { label, mediaId, bytes: out.bytes.byteLength, at }, fix);
+        const next = validateVan(res.session);
+        if (!next || res.session === latest) throw new AppError('van-invalid', 'core.err.save');
+        await tx.put('media', { id: mediaId, kind: 'van', mime: out.mime, bytes: out.bytes, w: out.w, h: out.h,
+          createdAt: at });
+        await tx.put('van', next);
+        if (res.replaced) await tx.del('media', res.replaced);
+        return next;
+      });
       cues.playCue('saved');
       cues.haptic('saved');
       toast(t(nextCorner(rec.photos) === null && label !== EXTRA ? 'furgone.allDone' : 'furgone.saved'), { icon: 'check' });

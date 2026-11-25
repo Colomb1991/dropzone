@@ -36,6 +36,7 @@ export default {
   'vicino.noPosition': 'Without your position I can\'t tell what is nearby.',
   'vicino.age': { one: 'Data from {n} day ago', other: 'Data from {n} days ago' },
   'vicino.offlineAge': { one: 'You\'re offline. Data from {n} day ago.', other: 'You\'re offline. Data from {n} days ago.' },
+  'vicino.offlineToday': 'You\'re offline. Data from today.',
   'vicino.offlineEmpty': 'Without network I can\'t search. Your places are always here.',
   'vicino.off': '"Nearby online" is off.',
   'vicino.error': 'The service isn\'t answering. Try again in a minute.',

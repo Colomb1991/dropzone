@@ -47,8 +47,11 @@ export default function NoteList({ query }) {
   const extra = useExtraPins(mapView);
 
   useEffect(() => {
-    // One reading for the distances, never the first permission prompt of the app.
-    if (!geo.lastFix() && settings.get('locationExplained') === true) geo.currentPosition().catch(() => null);
+    // One reading for the distances, never the first permission prompt of the app. Outside a shift
+    // the last fix can be hours old: it is renewed too.
+    const last = geo.lastFix();
+    const stale = !last || clock.now() - last.ts > 60000;
+    if (stale && settings.get('locationExplained') === true) geo.currentPosition().catch(() => null);
   }, []);
   useEffect(() => {
     setLimit(PAGE);

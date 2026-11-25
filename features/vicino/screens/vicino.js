@@ -10,6 +10,7 @@ import { CHIPS, CHIP_ICONS, itemsForChip, ownSpots, hoursLabel, ageDays } from '
 import { loadAround } from '../logic/cells.js';
 
 const RELOAD_M = 500;
+const STALE_FIX_MS = 10000;
 const OSM_DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su', 'PH', 'off'];
 const hoursWords = () => ({
   always: t('vicino.hours.always'),
@@ -25,13 +26,16 @@ function GoButton({ dest, navApp, onAsk }) {
   return html`<${Button} variant="secondary" icon="navigation" label=${t('core.action.go')} onClick=${() => onAsk(dest)} />`;
 }
 
-export default function VicinoScreen() {
+/** @param {{query?:Record<string,string>}} props */
+export default function VicinoScreen({ query }) {
   useLang();
   const online = useStore((s) => s.online);
   const [lastChip, setLastChip] = useSetting('vicino.lastChip');
   const [serviceOn] = useSetting('svc.overpass');
   const [navApp] = useSetting('nav.app');
-  const chip = CHIPS.includes(lastChip) ? lastChip : 'bagni';
+  // "Pausa qui" (/vicino?pausa=1): toilets with the courier's own spots first, whatever chip was last.
+  const [pausa, setPausa] = useState(query?.pausa === '1');
+  const chip = !pausa && CHIPS.includes(lastChip) ? lastChip : 'bagni';
   const liveFix = useFix();
   const [here, setHere] = useState(/** @type {{lat:number, lon:number}|null} */ (() => geo.lastFix()));
   const [locating, setLocating] = useState(false);
@@ -52,7 +56,9 @@ export default function VicinoScreen() {
     });
   };
   useEffect(() => {
-    if (!here) locate();
+    // Outside a shift the last fix can be hours old: it only fills the screen until a new one comes.
+    const last = geo.lastFix();
+    if (!last || clock.now() - last.ts > STALE_FIX_MS) locate();
   }, []);
   useEffect(() => {
     if (liveFix) setHere({ lat: liveFix.lat, lon: liveFix.lon });
@@ -106,7 +112,8 @@ export default function VicinoScreen() {
         action=${{ label: t('core.action.openSettings'), onClick: () => router.navigate('/impostazioni') }} />`;
     } else if (reason === 'offline') {
       notice = html`<${Banner} tone="neutral" icon="wifi-off"
-        text=${records.length ? tn('vicino.offlineAge', days) : t('vicino.offlineEmpty')} />`;
+        text=${!records.length ? t('vicino.offlineEmpty')
+          : days === 0 ? t('vicino.offlineToday') : tn('vicino.offlineAge', days)} />`;
     } else if (outcome.failed > 0 && outcome.missing > 0) {
       notice = html`<${Banner} tone="warning" icon="triangle-alert" text=${t('vicino.error')}
         action=${{ label: t('core.action.retry'), onClick: () => setReloadKey((k) => k + 1) }} />`;
@@ -122,7 +129,10 @@ export default function VicinoScreen() {
     <div class="stack">
       <${Chips} label=${t('vicino.title')}>
         ${CHIPS.map((c) => html`<${Chip} label=${t(`vicino.chip.${c}`)} icon=${CHIP_ICONS[c]} pressed=${c === chip}
-          onToggle=${() => setLastChip(c).catch((err) => log.error('vicino', err))} />`)}
+          onToggle=${() => {
+            setPausa(false);
+            setLastChip(c).catch((err) => log.error('vicino', err));
+          }} />`)}
       <//>
       ${!here && html`<${Empty} icon="locate-fixed" title=${t(locating ? 'vicino.locating' : 'vicino.noPosition')}
         action=${locating ? undefined : { label: t('core.action.retry'), onClick: locate }} />`}

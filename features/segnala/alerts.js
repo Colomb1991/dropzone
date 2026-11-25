@@ -1,9 +1,9 @@
 // @ts-check
 // Repository of the `alerts` store, the proximity source `alert` and the map pins.
-import { db, clock, env, events, format, i18n, t, tick, proximity, log } from '../../core/api.js';
+import { db, clock, env, events, format, geo, i18n, t, tick, proximity, log } from '../../core/api.js';
 import { alertType, alertTypeKey, ALERT_RADIUS_M } from '../../core/pure/catalog.js';
 import { validateAlert, buildMessage, KEEP_AFTER_EXPIRY_MS } from './logic/message.js';
-import { buildAlertUrl, fitAlertText } from './logic/alert-link.js';
+import { buildAlertUrl, fitAlertText, alertId } from './logic/alert-link.js';
 
 const STORE = 'alerts';
 
@@ -21,6 +21,13 @@ export function takeCaptured() {
   return c;
 }
 
+export const FRESH_FIX_MS = 10000;
+/** The last fix, only while it is fresh: outside a shift, or with the phone in a pocket, it can be hours old. */
+export function freshFix(now = clock.now()) {
+  const fix = geo.lastFix();
+  return fix && now - fix.ts <= FRESH_FIX_MS ? fix : null;
+}
+
 /** Not expired, newest first. @returns {Promise<Alert[]>} */
 export async function listActive(now = clock.now()) {
   /** @type {Alert[]} */
@@ -31,8 +38,10 @@ export async function listActive(now = clock.now()) {
 /** Own alert at a position; it never fires for its author. @returns {Promise<Alert>} */
 export async function createAlert({ type, lat, lon, at }) {
   const createdAt = Math.floor(at / 60000) * 60000;
+  const place = { lat: Math.round(lat * 1e5) / 1e5, lon: Math.round(lon * 1e5) / 1e5 };
   const rec = validateAlert({
-    id: crypto.randomUUID(), type, lat: Math.round(lat * 1e5) / 1e5, lon: Math.round(lon * 1e5) / 1e5,
+    // The id of its own link: the author who opens it does not get a second copy that alerts them.
+    id: alertId({ type, ...place, createdAt }), type, ...place,
     createdAt, expiresAt: createdAt + alertType(type).ttlMin * 60000, text: '', origin: 'mine', fired: true,
   });
   if (!rec) throw new Error('alert-invalid');

@@ -37,6 +37,7 @@ export default {
   'vicino.noPosition': 'Senza posizione non so cosa c\'è vicino.',
   'vicino.age': { one: 'Dati di {n} giorno fa', other: 'Dati di {n} giorni fa' },
   'vicino.offlineAge': { one: 'Sei offline. Dati di {n} giorno fa.', other: 'Sei offline. Dati di {n} giorni fa.' },
+  'vicino.offlineToday': 'Sei offline. Dati di oggi.',
   'vicino.offlineEmpty': 'Senza rete non posso cercare. I tuoi posti ci sono sempre.',
   'vicino.off': '«Vicino a me online» è spento.',
   'vicino.error': 'Il servizio non risponde. Riprova tra un minuto.',

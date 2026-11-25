@@ -45,9 +45,17 @@ function dismiss(id) {
 
 let locationAsked = 0;
 
+/** Screens that use the position: Turno home, Note, Vicino, Segnala, SOS. */
+const LOCATION_PATHS = ['/note', '/vicino', '/segnala', '/sos'];
+
+/** "Posizione spenta" shows only where the position matters, not on settings, hours or diagnostics. */
+export function needsLocation(path) {
+  return path === '/' || LOCATION_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
+}
+
 /**
  * @param {import('../../core/types.js').AppState} s
- * @param {{onLocationHelp:()=>void, refresh:()=>void}} ctx
+ * @param {{onLocationHelp:()=>void, refresh:()=>void, path?:string}} ctx `path`: the route on screen
  * @returns {{id:string, tone:string, icon:string, text:string, action?:{label:string, onClick:()=>void},
  *   onDismiss?:()=>void}|null}
  */
@@ -59,7 +67,7 @@ export function pickBanner(s, ctx) {
       action: { label: t('core.banner.rearm'), onClick: () => session.rearmAudio() } };
   }
   if (moving) return { id: 'moving', tone: 'info', icon: 'car', text: t('core.banner.moving') };
-  if (s.gps.state === 'denied') {
+  if (s.gps.state === 'denied' && (ctx.path === undefined || needsLocation(ctx.path))) {
     return { id: 'location', tone: 'warning', icon: 'locate-fixed', text: t('core.banner.locationOff'),
       action: { label: t('core.action.activate'), onClick: () => {
         // The browser asks again only while the answer is still open; after that, explain where to go.
@@ -134,7 +142,7 @@ export function BannerHost() {
       off();
     };
   }, []);
-  const b = pickBanner(s, { onLocationHelp: () => setHelp(true), refresh });
+  const b = pickBanner(s, { onLocationHelp: () => setHelp(true), refresh, path: router.current().path });
   return html`
     ${b && html`<${Banner} key=${b.id} tone=${b.tone} icon=${b.icon} text=${b.text} action=${b.action}
       onDismiss=${b.onDismiss} pulse=${pulse && b.id === 'moving'} />`}

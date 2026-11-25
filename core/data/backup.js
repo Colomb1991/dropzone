@@ -97,6 +97,16 @@ export async function previewBackup(file) {
 const ERR_KEYS = { 'not-backup': 'core.err.backupNot', 'too-new': 'core.err.backupNew', 'too-big': 'core.err.backupBig' };
 
 /**
+ * A shift that was running when the file was made: on a phone that does not have it, nothing would
+ * ever close it (the active-shift pointer is not in the file). It ends where it was last seen.
+ */
+function closeOpenShift(s) {
+  const endAt = Math.max(s.startAt, s.lastSeenAt);
+  return { ...s, endAt, edited: true, breaks: s.breaks.map((b) => (b.endAt === null
+    ? { ...b, endAt: Math.max(b.startAt, Math.min(b.startAt + b.plannedMin * 60000, endAt)), auto: true } : b)) };
+}
+
+/**
  * Merge only: adds what is missing, keeps the newer of two versions, fills settings never set.
  * Nothing on the phone is deleted. Interrupted: pick the file again.
  * @param {File} file @returns {Promise<{added:number, updated:number, skipped:number}>}
@@ -132,7 +142,8 @@ export async function restoreBackup(file) {
     if (first) return true;
     const row = decodeLine(line);
     const def = row ? defs.get(row.s) : undefined;
-    const rec = row && def ? upgradeRecord(def, row.r, schema, DB_VERSION) : null;
+    let rec = row && def ? upgradeRecord(def, row.r, schema, DB_VERSION) : null;
+    if (row && rec && row.s === 'shifts' && /** @type {any} */ (rec).endAt === null) rec = closeOpenShift(rec);
     if (!row || !rec || (row.s === 'settings' && !settingInBackup(/** @type {any} */ (rec).key))) {
       if (line.trim() !== '') stats.skipped++;
       return true;
@@ -163,7 +174,8 @@ export function startChangeTracking() {
   if (tracking) return;
   tracking = true;
   events.on('data:changed', (e) => {
-    if (!TRACKED.has(e.store) || e.remote) return;
+    // 'clear' is "Elimina tutto": writing the setting here would leave a record behind the wipe.
+    if (!TRACKED.has(e.store) || e.remote || e.op === 'clear') return;
     const last = settings.get('lastChangeAt');
     if (last !== null && now() - last < 600000) return;
     settings.set('lastChangeAt', now()).catch((err) => log.error('backup', err));

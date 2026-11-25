@@ -90,7 +90,9 @@ export async function loadCounts() {
     safe(db.count('notes'), 0), safe(db.count('shifts'), 0), safe(db.count('media'), 0),
     safe(slots.collect('data.counts', {}), []),
   ]);
-  const rows = /** @type {any[]} */ (extra).filter((r) => r && typeof r.labelKey === 'string' && r.count > 0);
+  // The notes are already in the sentence of the dialog: their own row would say them twice.
+  const rows = /** @type {any[]} */ (extra).filter((r) => r && typeof r.labelKey === 'string' && r.count > 0
+    && r.featureId !== 'note');
   return { notes, shifts, photos, extra: rows };
 }
 

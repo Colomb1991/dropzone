@@ -137,8 +137,11 @@ function PreviewStep({ preview, onDone }) {
   </div>`;
 }
 
-export default function ZonaScreen() {
+/** @param {{query?:Record<string,string>}} props */
+export default function ZonaScreen({ query }) {
   useLang();
+  // "Ho ricevuto una zona" (onboarding) opens /zona?importa=1: the import comes first.
+  const [importFirst] = useState(query?.importa === '1');
   const [step, setStep] = useState(/** @type {'home'|'select'|'send'|'preview'} */ ('home'));
   const [picked, setPicked] = useState(() => new Set());
   const [preview, setPreview] = useState(/** @type {any} */ (null));
@@ -164,16 +167,25 @@ export default function ZonaScreen() {
     if (!last) return;
     toast(tn('zona.undo.done', await undoImport(last.id)));
   });
+  useEffect(() => {
+    if (!importFirst) return;
+    // The picker opens where the tap that led here still counts as a user action; where the browser
+    // refuses, the highlighted "Importa file" tile is one tap away. The flag leaves the address, so
+    // coming back to this screen does not ask for a file again.
+    router.navigate('/zona', { replace: true });
+    input.current?.click();
+  }, []);
   const home = () => setStep('home');
-  const titles = { home: 'zona.title', select: 'zona.export.title', send: 'zona.export.title', preview: 'zona.import.title' };
+  const titles ={ home: 'zona.title', select: 'zona.export.title', send: 'zona.export.title', preview: 'zona.import.title' };
 
   return html`<${Screen} title=${t(titles[step])} back="/altro"
     action=${step !== 'home' && html`<${Button} variant="ghost" label=${t('core.action.cancel')} onClick=${home} />`}>
     ${step === 'home' && html`<div class="stack stack--lg">
       <${Art} name="path" />
       <${Tiles}>
-        <${Tile} icon="upload" label=${t('zona.export.tile')} primary onClick=${startExport} />
-        <${Tile} icon="download" label=${t('zona.import.tile')} onClick=${() => input.current?.click()} />
+        <${Tile} icon="upload" label=${t('zona.export.tile')} primary=${!importFirst} onClick=${startExport} />
+        <${Tile} icon="download" label=${t('zona.import.tile')} primary=${importFirst}
+          onClick=${() => input.current?.click()} />
       <//>
       <input type="file" accept=".txt,text/plain" hidden ref=${input} onChange=${pickFile.run}
         aria-label=${t('zona.import.tile')} />

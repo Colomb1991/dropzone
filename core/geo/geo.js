@@ -91,7 +91,14 @@ export function setProvider(p) {
 
 /** Idempotent. Call inside the tap that starts the shift (permission prompt). */
 export function start() {
-  if (running) return;
+  if (running) {
+    // "Attiva" after a refusal: the watch was stopped, so ask again.
+    if (store.getState().gps.state === 'denied') {
+      setGps('starting', null);
+      watch();
+    }
+    return;
+  }
   running = true;
   impreciseSince = null;
   setGps('starting', null);
@@ -148,7 +155,11 @@ export async function currentPosition(opts = {}) {
     const raw = await prov().getOnce({ timeoutMs: opts.timeoutMs ?? 8000, maxAgeMs });
     const r = filterStep(initialFilterState(), raw);
     if (!r.fix) return null;
-    if (!running) publish(r.fix);
+    if (!running) {
+      // A reading that works again ends "Posizione spenta".
+      if (store.getState().gps.state === 'denied') setGps('off', null);
+      publish(r.fix);
+    }
     return r.fix;
   } catch (err) {
     const code = /** @type {any} */ (err)?.message;
