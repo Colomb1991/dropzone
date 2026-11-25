@@ -37,6 +37,7 @@ export default {
   'turno.briefing.go': 'Ok, parto',
   'turno.autolock.title': 'Lo schermo può spegnersi',
   'turno.autolock.text': 'Su questo iPhone lo schermo può spegnersi. Impostazioni → Schermo e luminosità → Blocco automatico → Mai. A fine turno rimettilo com\'era.',
+  'turno.autolock.textOther': 'Su questo telefono lo schermo può spegnersi. Nelle impostazioni dello schermo scegli il tempo di spegnimento più lungo. A fine turno rimettilo come prima.',
   'turno.autolock.done': 'Ho fatto',
   'turno.break.title': 'Pausa',
   'turno.break.start': 'Inizia pausa',

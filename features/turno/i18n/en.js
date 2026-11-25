@@ -37,6 +37,7 @@ export default {
   'turno.briefing.go': 'OK, let\'s go',
   'turno.autolock.title': 'The screen may turn off',
   'turno.autolock.text': 'On this iPhone the screen may turn off. Settings → Display & Brightness → Auto-Lock → Never. Put it back at the end of the shift.',
+  'turno.autolock.textOther': 'On this phone the screen may turn off. In the display settings choose the longest screen timeout. Put it back at the end of the shift.',
   'turno.autolock.done': 'Done',
   'turno.break.title': 'Break',
   'turno.break.start': 'Start break',

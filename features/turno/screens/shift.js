@@ -4,7 +4,7 @@ import { useStore, useTick, useSetting, useSlot, useAction } from '../../../ui/h
 import {
   Screen, Button, Sheet, Tile, Tag, List, ListRow, SlotOutlet, confirm, setShiftContrast, shiftContrast,
 } from '../../../ui/kit/index.js';
-import { t, session, speech, presenter, router, format } from '../../../core/api.js';
+import { t, session, speech, presenter, router, format, env } from '../../../core/api.js';
 import { breakState, countdown } from '../logic/shift-math.js';
 import * as state from '../state.js';
 import { Briefing } from './briefing.js';
@@ -60,7 +60,7 @@ function BreakSheet({ shift, now, onClose }) {
 function AutoLockSheet({ onClose }) {
   return html`<${Sheet} open title=${t('turno.autolock.title')} onClose=${onClose}
     footer=${html`<${Button} block label=${t('turno.autolock.done')} onClick=${onClose} />`}>
-    <p class="t-body-m">${t('turno.autolock.text')}</p>
+    <p class="t-body-m">${t(env.os() === 'ios' ? 'turno.autolock.text' : 'turno.autolock.textOther')}</p>
   <//>`;
 }
 
