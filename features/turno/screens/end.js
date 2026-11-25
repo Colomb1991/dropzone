@@ -34,7 +34,7 @@ function ContractSheet({ onClose }) {
   </div>`;
   return html`<${Sheet} open title=${t('turno.contract.title')} onClose=${later} footer=${footer}>
     <div class="stack">
-      <h3 class="section-title">${t('turno.contract.hours')}</h3>
+      <h3 class="t-label f-turno-q">${t('turno.contract.hours')}</h3>
       <${Chips} label=${t('turno.contract.hours')}>
         ${HOUR_CHIPS.map((h) => html`<${Chip} label=${String(h)} pressed=${!other && hours === h}
           onToggle=${() => {
@@ -45,7 +45,7 @@ function ContractSheet({ onClose }) {
       <//>
       ${other && html`<${Stepper} label=${t('turno.contract.otherLabel')} value=${hours} min=${20} max=${48}
         step=${0.5} format=${(n) => format.number(n, 1)} onChange=${setHours} />`}
-      <h3 class="section-title">${t('turno.contract.days')}</h3>
+      <h3 class="t-label f-turno-q">${t('turno.contract.days')}</h3>
       <${Chips} label=${t('turno.contract.days')}>
         ${[5, 6].map((d) => html`<${Chip} label=${String(d)} pressed=${days === d} onToggle=${() => setDays(d)} />`)}
       <//>

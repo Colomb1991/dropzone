@@ -95,6 +95,8 @@ function Contact() {
 function Services() {
   const [tiles] = useSetting('svc.tiles');
   const [overpass] = useSetting('svc.overpass');
+  const [photon] = useSetting('svc.photon');
+  const [weather] = useSetting('svc.weather');
   const [cache, setCache] = useState({ count: 0, bytes: 0 });
   const refresh = () => tileCacheInfo().then(setCache);
   useEffect(() => {
@@ -118,6 +120,14 @@ function Services() {
     <${Toggle} label=${t('impostazioni.svc.overpass')} checked=${overpass === true}
       onChange=${(v) => put('svc.overpass', v)} />
     <p class="t-body-m t-muted">${t('impostazioni.svc.overpassText')}</p>
+    <hr class="f-imp-rule" />
+    <${Toggle} label=${t('impostazioni.svc.photon')} checked=${photon === true}
+      onChange=${(v) => put('svc.photon', v)} />
+    <p class="t-body-m t-muted">${t('impostazioni.svc.photonText')}</p>
+    <hr class="f-imp-rule" />
+    <${Toggle} label=${t('impostazioni.svc.weather')} checked=${weather === true}
+      onChange=${(v) => put('svc.weather', v)} />
+    <p class="t-body-m t-muted">${t('impostazioni.svc.weatherText')}</p>
     <p class="t-caption t-muted">${t('impostazioni.svc.footer')}</p>`;
 }
 

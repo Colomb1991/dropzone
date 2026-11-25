@@ -1,3 +1,5 @@
 .f-ore-month { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
 .f-ore-month__name { flex: 1; margin: 0; text-align: center; }
+/* A week's heading carries hours ("43 h 10 oltre il contratto"): sentence case, or it reads "43 H 10". */
+.f-ore-week { letter-spacing: 0; text-transform: none; font-size: var(--fs-caption); line-height: var(--lh-caption); }
 .f-ore-actions { display: grid; gap: var(--sp-3); margin-top: var(--sp-4); }

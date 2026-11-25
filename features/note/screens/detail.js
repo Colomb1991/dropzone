@@ -51,7 +51,7 @@ export default function NoteDetail({ params }) {
     : t('note.meta.mine', { date: format.dateShort(note.createdAt) });
 
   return html`<${Screen} title=${t('note.title')} back="/note">
-    <${Card} tone=${c.tone} icon=${c.icon} title=${dist ? `${label} · ${dist}` : label}>
+    <${Card} tone=${c.tone} icon=${c.icon} title=${label}>
       ${note.text
         ? html`<p class="t-title-l f-note-text">${note.text}</p>`
         : html`<p class="t-body-m t-muted">${t('note.detail.noText')}</p>`}
@@ -72,7 +72,7 @@ export default function NoteDetail({ params }) {
       <${VisitButtons} note=${note} />
       <p class="t-caption t-muted">${t('core.visit.hint')}</p>
     <//>`}
-    <p class="t-caption t-muted">${meta}</p>
+    <p class="t-caption t-muted">${dist ? `${meta} · ${dist}` : meta}</p>
     <${Button} block size="xl" icon="navigation" label=${t('core.action.takeMe')} onClick=${() => setNav(true)} />
     <${LinkButton} block variant="secondary" icon="pencil" label=${t('core.action.edit')}
       href=${router.href(`/note/${id}/modifica`)} />

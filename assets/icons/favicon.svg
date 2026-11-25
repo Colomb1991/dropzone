@@ -1,10 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <title>Dropzone</title>
-  <rect width="512" height="512" rx="96" fill="#111111"/>
+  <defs>
+    <radialGradient id="night" cx="50%" cy="40%" r="72%">
+      <stop offset="0" stop-color="#16306E"/>
+      <stop offset="0.55" stop-color="#0A1736"/>
+      <stop offset="1" stop-color="#050B1C"/>
+    </radialGradient>
+    <linearGradient id="pin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E9EEFB"/>
+      <stop offset="1" stop-color="#8FB2FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#night)"/>
   <g transform="translate(0 22)">
-    <ellipse cx="256" cy="317" rx="143" ry="46" fill="none" stroke="#CCFF00" stroke-width="26"/>
-    <path d="M256 317 L188.2 197.5 A78 78 0 1 1 323.8 197.5 Z" fill="#111111" stroke="#111111" stroke-width="30" stroke-linejoin="round"/>
-    <path d="M256 317 L188.2 197.5 A78 78 0 1 1 323.8 197.5 Z" fill="#CCFF00" stroke="#CCFF00" stroke-width="6" stroke-linejoin="round"/>
-    <circle cx="256" cy="159" r="27" fill="#111111"/>
+    <ellipse cx="256" cy="317" rx="143" ry="46" fill="none" stroke="#8FB2FF" stroke-width="24"/>
+    <path d="M256 317 L188.2 197.5 A78 78 0 1 1 323.8 197.5 Z" fill="#0A1736" stroke="#0A1736" stroke-width="30" stroke-linejoin="round"/>
+    <path d="M256 317 L188.2 197.5 A78 78 0 1 1 323.8 197.5 Z" fill="url(#pin)" stroke="url(#pin)" stroke-width="6" stroke-linejoin="round"/>
+    <circle cx="256" cy="159" r="27" fill="#0A1736"/>
   </g>
 </svg>

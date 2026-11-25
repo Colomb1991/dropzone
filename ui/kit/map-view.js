@@ -15,7 +15,9 @@ import { Button } from './button.js';
  * @param {{center:{lat:number, lon:number}, zoom?:number, pins:import('../map/map.js').MapPin[],
  *   user?:boolean, line?:[[number,number],[number,number]]|null, crosshair?:boolean,
  *   onLongPress?:(p:{lat:number, lon:number})=>void, onPinTap?:(id:string)=>void,
- *   onReady?:(m:import('../map/map.js').MapHandle)=>void, fallback:any}} props
+ *   onReady?:(m:import('../map/map.js').MapHandle)=>void, fallback:any, follow?:boolean,
+ *   cluster?:boolean}} props  `follow`: keep the user in view (default: same as `user`);
+ *   `cluster`: false shows every pin on its own (default true)
  */
 export function MapView(props) {
   const { center, zoom, pins, user, line, crosshair, fallback } = props;
@@ -44,7 +46,8 @@ export function MapView(props) {
     let dead = false;
     setState('loading');
     createMap(el.current, {
-      center: view.current.center, zoom: view.current.zoom, theme, follow: Boolean(user),
+      center: view.current.center, zoom: view.current.zoom, theme,
+      follow: live.current.follow ?? Boolean(user), cluster: live.current.cluster !== false,
       onLongPress: (p) => live.current.onLongPress?.(p),
       onPinTap: (id) => live.current.onPinTap?.(id),
     }).then((m) => {

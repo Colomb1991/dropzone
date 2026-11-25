@@ -62,7 +62,7 @@ export function Briefing({ shift, onClose }) {
       ${changing && html`<${Keypad} mode="time" value=${digits} label=${t('turno.briefing.changeLabel')}
         onChange=${setDigits} onDone=${applyStart.run} />`}
       ${mode === null && html`
-        <h3 class="section-title">${t('turno.briefing.where')}</h3>
+        <h3 class="t-label f-turno-q">${t('turno.briefing.where')}</h3>
         <${Tiles}>
           <${Tile} icon="car" label=${t('turno.mode.holder')} value=${t('turno.mode.holderSub')}
             onClick=${() => pickMode.run('holder')} />
@@ -73,7 +73,7 @@ export function Briefing({ shift, onClose }) {
         ? html`<${List}>${rows.map((r) => html`<${ListRow} icon=${r.icon ?? 'info'} title=${r.text} />`)}<//>`
         : !items.loading && html`<p class="t-body-m">${t('turno.briefing.none')}</p>`}
       <p class="t-caption t-muted">${t('turno.briefing.silent')}</p>
-      <p class="t-caption t-muted">${t('turno.briefing.road')}</p>
+      ${mode !== 'pocket' && html`<p class="t-caption t-muted">${t('turno.briefing.road')}</p>`}
     </div>
   <//>`;
 }

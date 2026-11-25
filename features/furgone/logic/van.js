@@ -2,6 +2,7 @@
 // Diario furgone (SPEC 4.11): record rules, the burnt-in stamp, grouping. Pure.
 import { LIMITS } from '../../../core/pure/catalog.js';
 import { isLat, isLon } from '../../../core/pure/validators.js';
+import { validateChecks } from './checklist.js';
 
 /** The four guided corners, in the order of SPEC 3.2. */
 export const CORNERS = /** @type {const} */ (['fl', 'fr', 'rr', 'rl']);
@@ -13,7 +14,9 @@ const DAY_MS = 86400000;
 
 /** @typedef {{label:string, mediaId:string, bytes:number, at:number}} VanPhoto */
 /** @typedef {{id:string, shiftId:string|null, kind:'start'|'end', at:number, lat:number|null,
- *   lon:number|null, acc:number|null, photos:VanPhoto[], updatedAt:number}} VanSession */
+ *   lon:number|null, acc:number|null, photos:VanPhoto[], updatedAt:number,
+ *   checks:import('./checklist.js').Check[],   // the checklist as ticked in this session; [] = not used
+ *   checkedAt:number|null}} VanSession */
 
 const isTs = (v) => typeof v === 'number' && Number.isFinite(v) && v > 0;
 const isId = (v) => typeof v === 'string' && v.length > 0 && v.length <= 80;
@@ -30,17 +33,32 @@ export function validateVan(rec) {
       bytes: Number.isFinite(p.bytes) && p.bytes > 0 ? p.bytes : 0, at: isTs(p.at) ? p.at : rec.at });
   }
   const located = isLat(rec.lat) && isLon(rec.lon);
+  // Records saved before the checklist existed have no `checks`: they read as "not used". A broken
+  // list never costs the session its photos.
+  const checks = validateChecks(rec.checks) ?? [];
   return {
     id: rec.id, shiftId: isId(rec.shiftId) ? rec.shiftId : null, kind: rec.kind, at: rec.at,
     lat: located ? rec.lat : null, lon: located ? rec.lon : null,
     acc: located && Number.isFinite(rec.acc) && rec.acc >= 0 ? rec.acc : null,
     photos, updatedAt: isTs(rec.updatedAt) ? rec.updatedAt : rec.at,
+    checks, checkedAt: checks.length > 0 && isTs(rec.checkedAt) ? rec.checkedAt : null,
   };
 }
 
 /** @returns {VanSession} */
 export function newSession({ id, kind, shiftId, at }) {
-  return { id, shiftId: shiftId ?? null, kind, at, lat: null, lon: null, acc: null, photos: [], updatedAt: at };
+  return { id, shiftId: shiftId ?? null, kind, at, lat: null, lon: null, acc: null, photos: [], updatedAt: at,
+    checks: [], checkedAt: null };
+}
+
+/** The session with its checklist as ticked now. @param {VanSession} session @returns {VanSession} */
+export function withChecks(session, checks, at) {
+  return { ...session, checks, checkedAt: at, updatedAt: Math.max(session.updatedAt, at) };
+}
+
+/** Media ids a session cannot be shown without: a backup takes the record only with its photos. */
+export function mediaRefs(rec) {
+  return Array.isArray(rec?.photos) ? rec.photos.map((p) => p?.mediaId).filter((id) => typeof id === 'string') : [];
 }
 
 const p2 = (n) => String(n).padStart(2, '0');
@@ -127,11 +145,15 @@ export function defaultKind({ shift, lastEndedAt, now }) {
   return typeof lastEndedAt === 'number' && now - lastEndedAt >= 0 && now - lastEndedAt <= 2 * 3600000 ? 'end' : 'start';
 }
 
-/** History: sessions that hold photos, newest day first. @returns {{day:string, sessions:VanSession[]}[]} */
+/**
+ * History: sessions that hold photos or a ticked checklist, newest day first.
+ * @returns {{day:string, sessions:VanSession[]}[]}
+ */
 export function groupByDay(sessions) {
   /** @type {Map<string, VanSession[]>} */
   const days = new Map();
-  for (const s of [...sessions].filter((x) => x.photos.length > 0).sort((a, b) => b.at - a.at)) {
+  const used = (x) => x.photos.length > 0 || (x.checks ?? []).length > 0;
+  for (const s of [...sessions].filter(used).sort((a, b) => b.at - a.at)) {
     const key = dayKey(s.at);
     if (!days.has(key)) days.set(key, []);
     /** @type {VanSession[]} */ (days.get(key)).push(s);

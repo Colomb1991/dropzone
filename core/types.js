@@ -56,7 +56,9 @@
  *   indexes?:{name:string, keyPath:string, unique?:boolean}[],
  *   since:number, backup:'always'|'never'|'optional',
  *   validate:(rec:unknown)=>object|null,
- *   upgrades?:Record<number,(rec:object)=>object|null>}} StoreDef */
+ *   upgrades?:Record<number,(rec:object)=>object|null>,
+ *   mediaRefs?:(rec:any)=>string[]      // media ids the record cannot live without (backup: whole or not at all)
+ * }} StoreDef */
 /** @typedef {{index?:string, eq?:any, from?:any, to?:any, limit?:number, reverse?:boolean}} Query */
 /** @typedef {{get(store:string, key:any):Promise<any>, getAll(store:string, q?:Query):Promise<any[]>,
  *   count(store:string, q?:Query):Promise<number>, put(store:string, rec:object):Promise<any>,
@@ -65,6 +67,8 @@
 /** @typedef {{path:string, load:()=>Promise<{default:Function}>, titleKey:string,
  *   chrome?:'tabs'|'back'|'none', open?:boolean, whileMoving?:boolean}} RouteDef */
 /** @typedef {{slot:string, order:number, featureId?:string, visible?:()=>boolean,
- *   load?:()=>Promise<{default:Function}>, provide?:(ctx:object)=>Promise<object[]>}} SlotItem */
+ *   load?:()=>Promise<{default:Function}>, provide?:(ctx:object)=>Promise<object[]>,
+ *   watch?:string[]                     // data slots: stores whose changes make the rows stale
+ * }} SlotItem */
 
 export {};

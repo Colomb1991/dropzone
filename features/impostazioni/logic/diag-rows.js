@@ -108,8 +108,9 @@ function runNet() {
   const meta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
   const hosts = classifyHosts(urls, location.host, hostsFromCsp(meta?.getAttribute('content') ?? ''));
   const lines = [
-    t('impostazioni.diag.r.net', { tiles: s.tiles.requests, overpass: s.overpass.requests, local: s.local.requests,
-      errors: errorsCount }),
+    // Every service of core/net/services.js is counted here: the row is how a tester checks the promises.
+    t('impostazioni.diag.r.net', { tiles: s.tiles.requests, overpass: s.overpass.requests, photon: s.photon.requests,
+      weather: s.weather.requests, local: s.local.requests, errors: errorsCount }),
     t('impostazioni.diag.r.netHosts', { list: hosts.known.join(', ') || t('impostazioni.diag.r.netNone') }),
   ];
   if (hosts.unknown.length) lines.push(t('impostazioni.diag.r.netUnknown', { list: hosts.unknown.join(', ') }));

@@ -21,6 +21,7 @@ export default {
   'turno.lastAlert': 'Ultimo avviso: {title}, {dist}',
   'turno.tile.break': 'Pausa',
   'turno.tile.report': 'Segnala',
+  'turno.tools': 'Strumenti',
   'turno.briefing.title': 'Oggi occhio a',
   'turno.briefing.started': 'Iniziato alle {time}',
   'turno.briefing.change': 'Cambia',

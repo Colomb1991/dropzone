@@ -4,7 +4,7 @@
   'use strict';
   var root = document.documentElement;
   var scope = new URL('./', document.baseURI).pathname;
-  var COLORS = { light: '#EEEEEE', dark: '#111111', hc: '#FFFFFF' };
+  var COLORS = { light: '#F4F4F1', dark: '#050B1C', hc: '#FFFFFF' };
   var mq = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null;
 
   function read(name) {

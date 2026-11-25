@@ -30,6 +30,8 @@ let breakCued = false;
 let movingAfterBreakSince = null;
 let gpsLostAt = null;
 let gpsLostSaid = false;
+/** @type {Promise<Shift>|null} the start being written, if any */
+let starting = null;
 
 const sayAfter = (key, cueDur) => setTimeout(() => speech.say(t(key)), cueDur * 1000 + 150);
 const openBreak = (s) => (s ? s.breaks.find((b) => b.endAt === null) ?? null : null);
@@ -177,17 +179,27 @@ function unwire() {
  */
 export function startShift(opts = {}) {
   if (shift) return Promise.resolve(shift);
+  // A second tap while the first is still being written joins it: never two shifts.
+  if (starting) return starting;
   const mode = settings.get('shift.mode') ?? 'holder';
   cues.unlockAudio();
   speech.unlock();
   applyMode(mode, opts.location !== false);
-  return (async () => {
+  const job = (async () => {
     const at = now();
     /** @type {Shift} */
     const rec = { id: crypto.randomUUID(), startAt: opts.startAt ?? at, endAt: null, mode, breaks: [],
       edited: opts.startAt !== undefined, alertsFired: 0, lastSeenAt: at };
-    await shifts.saveShift(rec);
-    await shifts.setActiveId(rec.id);
+    try {
+      // Record and active pointer in one transaction: a crash leaves both or neither.
+      await shifts.openShift(rec);
+    } catch (err) {
+      // Nothing was written: GPS and wake lock must not stay on behind the idle home.
+      geo.stop();
+      wake.release();
+      store.setState({ moving: false, fast: false });
+      throw err;
+    }
     setShift(rec);
     store.setState({ passenger: false });
     wire();
@@ -197,19 +209,28 @@ export function startShift(opts = {}) {
     db.requestPersist();
     return rec;
   })();
+  starting = job;
+  const settled = () => {
+    if (starting === job) starting = null;
+  };
+  job.then(settled, settled);
+  return job;
 }
 
 /** @param {{endAt?:number, autoClosed?:boolean}} [opts] endAt: recovery of a forgotten stop */
 export async function endShift(opts = {}) {
   if (!shift) throw new AppError('no-shift', 'core.err.generic');
+  const id = shift.id;
   const endAt = opts.endAt ?? now();
-  const done = await patch((s) => ({
+  // Closed record and cleared pointer in one transaction.
+  const done = await shifts.closeShift(id, (s) => ({
     ...s, endAt: Math.max(endAt, s.startAt), edited: s.edited || opts.endAt !== undefined,
     // A break still open is closed at its planned end and flagged (SPEC 6.4).
     breaks: s.breaks.map((b) => (b.endAt === null
       ? { ...b, endAt: Math.max(b.startAt, Math.min(plannedEnd(b), endAt)), auto: true } : b)),
   }));
-  await shifts.setActiveId(null);
+  // A second call that arrived while the first was writing: the first one has already cleaned up.
+  if (!shift || shift.id !== id) return done;
   unwire();
   engine.stop();
   geo.stop();
@@ -227,12 +248,14 @@ export async function endShift(opts = {}) {
  * @returns {Promise<'none'|'resumed'|'stale'>}
  */
 export async function resumeIfOpen() {
-  const id = await shifts.getActiveId();
-  const rec = id ? await shifts.getShift(id) : undefined;
-  if (!rec || rec.endAt !== null) {
-    if (id) await shifts.setActiveId(null);
-    return 'none';
+  // Only the shift the pointer names may be open. Anything else left open (a phantom from an app
+  // that died between two writes) is closed where it was last seen, or removed if it never ran.
+  const found = await shifts.recoverOpen();
+  if (found.closed > 0 || found.removed > 0) {
+    log.warn('session', 'phantom-shift', { closed: found.closed, removed: found.removed });
   }
+  const rec = found.active;
+  if (!rec) return 'none';
   const stale = now() - rec.lastSeenAt >= STALE_MS;
   setShift(rec);
   // Sound needs a tap after a reload: the shell calls rearmAudio() on the first click.

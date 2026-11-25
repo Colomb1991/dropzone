@@ -1,6 +1,9 @@
 // @ts-check
-// Slots: home.idle, home.tiles, home.shift, home.sticky, briefing, shift.end, map.pins,
-// diagnostics, data.counts, overlay.
+// Slots: home.idle, home.tiles, home.shift, home.sticky, shift.context, shift.tools, briefing,
+// shift.end, map.pins, diagnostics, data.counts, overlay.
+// `shift.context` is a data slot: rows {rank, icon, tone?, title, sub?, to?}. The shift home shows
+// only the row with the lowest rank; all of them, and the `shift.tools` components, are one tap
+// away in "Strumenti".
 import * as log from './log.js';
 
 /** @type {import('./types.js').SlotItem[]} */

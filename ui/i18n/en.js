@@ -13,7 +13,7 @@ export default {
   'ui.stub.text': 'This part is being built. It arrives with the next update.',
   'ui.second.text': 'Use that one. Only SOS and the legal pages work here.',
   'ui.share.text': 'Here is Dropzone: it remembers the zone and warns you when you are back there. Then I\'ll pass you my zone.',
-  'ui.share.sub': 'Send the app link',
+  'ui.share.sub': 'QR code and app link',
   'ui.more.passenger': 'I\'m a passenger',
   'ui.more.passengerSub': 'Unlocks the buttons for this shift',
   'ui.more.passengerText': 'Not driving? Buttons unlock only if a passenger is using the phone. The driver does not touch it.',

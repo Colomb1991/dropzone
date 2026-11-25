@@ -1,11 +1,11 @@
 // @ts-check
 import { html, useEffect, useState } from '../../../ui/html.js';
-import { useStore, useTick, useSetting, useSlot, useAction } from '../../../ui/hooks.js';
+import { useStore, useTick, useSetting, useSlot, useAction, useLive, useLang } from '../../../ui/hooks.js';
 import {
-  Screen, Button, Sheet, Tile, Tag, List, ListRow, SlotOutlet, confirm, setShiftContrast, shiftContrast,
+  Screen, Button, Sheet, Tile, Tag, Icon, List, ListRow, SlotOutlet, confirm, setShiftContrast, shiftContrast,
 } from '../../../ui/kit/index.js';
-import { t, session, speech, presenter, router, format, env } from '../../../core/api.js';
-import { breakState, countdown } from '../logic/shift-math.js';
+import { t, session, speech, presenter, router, format, env, slots, clock } from '../../../core/api.js';
+import { breakState, countdown, contextOrder } from '../logic/shift-math.js';
 import * as state from '../state.js';
 import { Briefing } from './briefing.js';
 
@@ -64,9 +64,33 @@ function AutoLockSheet({ onClose }) {
   <//>`;
 }
 
-/** Home during a shift (SPEC 2.5). @param {{shift:import('../../../core/types.js').Shift}} props */
+/** One `shift.context` row: a link when the feature gave a route, plain text otherwise. */
+function ContextRow({ row }) {
+  return html`<${ListRow} icon=${row.icon} tone=${row.tone} title=${row.title} sub=${row.sub}
+    chevron=${Boolean(row.to)} href=${row.to ? router.href(row.to) : undefined} />`;
+}
+
+/**
+ * "Strumenti": what the shift home has no room for, one tap away. Every context row (next stop,
+ * pace, weather) and the `shift.tools` components (Furgone qui).
+ */
+function ToolsSheet({ rows, onClose }) {
+  return html`<${Sheet} open title=${t('turno.tools')} onClose=${onClose}>
+    <div class="stack">
+      ${rows.length > 0 && html`<${List}>${rows.map((row) => html`<${ContextRow} row=${row} />`)}<//>`}
+      <${SlotOutlet} name="shift.tools" props=${{ onDone: onClose }} />
+    </div>
+  <//>`;
+}
+
+/**
+ * Home during a shift (SPEC 2.5). Priority at 360 x 640, top to bottom: status, "Cosa so di qui",
+ * at most one context row, break / tools / end, and the two main actions in the sticky bar.
+ * @param {{shift:import('../../../core/types.js').Shift}} props
+ */
 export default function ShiftHome({ shift }) {
   const now = useTick(1000);
+  const lang = useLang();
   const gps = useStore((s) => s.gps);
   const wake = useStore((s) => s.wake);
   const audio = useStore((s) => s.audio);
@@ -76,6 +100,12 @@ export default function ShiftHome({ shift }) {
   const lastAlert = useStore((s) => s.lastAlert);
   const [breakMin] = useSetting('shift.breakMin');
   const stickyItems = useSlot('home.sticky');
+  // Rows offered by the other features (next stop, pace, weather), read again when one of their
+  // stores changes and once a minute (the pace moves with the clock).
+  const contextItems = useSlot('shift.context');
+  const context = useLive([...new Set(contextItems.flatMap((s) => s.watch ?? []))],
+    () => slots.collect('shift.context', { now: clock.now(), shift }), [shift.id, Math.floor(now / 60000), lang]);
+  const contextRows = contextOrder(context.data);
   const [sheet, setSheet] = useState(() => (state.takeBriefing(shift.id) ? 'briefing' : null));
   const [contrast, setContrast] = useState(() => shiftContrast());
   /** undefined while the flag is being read */
@@ -117,8 +147,11 @@ export default function ShiftHome({ shift }) {
       tone=${wake === 'native' ? 'success' : 'warning'} />`}
     ${moving
       ? html`<${Tag} icon=${soundOk ? 'volume-2' : 'volume-x'} label=${voiceLabel} tone=${soundOk ? 'success' : 'danger'} />`
-      : html`<${Button} variant=${soundOk ? 'secondary' : 'danger'} icon=${soundOk ? 'volume-2' : 'volume-x'}
-          label=${voiceLabel} onClick=${testVoice} />`}
+      // Stopped, the voice tag is the test button: a tag to the eye, a 48 px target to the finger.
+      : html`<button type="button" class="tag f-turno-voice" data-tone=${soundOk ? 'success' : 'danger'}
+          onClick=${testVoice}>
+          <${Icon} name=${soundOk ? 'volume-2' : 'volume-x'} /><span>${voiceLabel}</span>
+        </button>`}
     ${passenger && html`<${Tag} icon="user" label=${t('core.tag.passenger')} tone="info" />`}`;
 
   const rearm = audio === 'locked' && !moving;
@@ -131,26 +164,29 @@ export default function ShiftHome({ shift }) {
   const reportTile = !stickyItems.some((s) => s.featureId === 'segnala');
   const showLast = lastAlert && now - lastAlert.at < LAST_ALERT_MS;
 
-  return html`<${Screen} title=${t('turno.shift.title', { d: format.duration(now - shift.startAt) })} tags=${tags}
-    sticky=${sticky}
+  return html`<${Screen} dense title=${t('turno.shift.title', { d: format.duration(now - shift.startAt) })}
+    tags=${tags} sticky=${sticky}
     action=${html`<${Button} variant=${contrast ? 'secondary' : 'ghost'} iconOnly icon="sun" label=${t('turno.sun')}
       onClick=${toggleContrast} />`}>
-    <div class="stack">
+    <div class="stack f-turno-home">
       ${showLast && html`<${List}>
         <${ListRow} icon="bell-ring" tone=${lastAlert.card.tone} chevron onClick=${() => presenter.reopenLast()}
           title=${t('turno.lastAlert', { title: lastAlert.card.title, dist: format.distance(lastAlert.card.distM) })} />
       <//>`}
       <${SlotOutlet} name="home.shift" />
+      ${contextRows.length > 0 && html`<${List}><${ContextRow} row=${contextRows[0]} /><//>`}
       <div class="tiles f-turno-tiles">
         <${Tile} icon="coffee" label=${t('turno.tile.break')} primary=${b.running}
           value=${b.running ? countdown(b.leftMs) : t('core.fmt.min', { n: breakMin })}
           onClick=${() => setSheet('break')} />
         ${reportTile && html`<${Tile} icon="megaphone" label=${t('turno.tile.report')} href=${router.href('/segnala')} />`}
+        <${Tile} icon="layout-grid" label=${t('turno.tools')} onClick=${() => setSheet('tools')} />
         <${Tile} icon="square" label=${t('turno.end')} tone="danger" onClick=${end.run} />
       </div>
     </div>
     ${sheet === 'briefing' && html`<${Briefing} shift=${shift} onClose=${() => setSheet(null)} />`}
     ${sheet === 'break' && html`<${BreakSheet} shift=${shift} now=${now} onClose=${() => setSheet(null)} />`}
+    ${sheet === 'tools' && html`<${ToolsSheet} rows=${contextRows} onClose=${() => setSheet(null)} />`}
     ${sheet === 'autolock' && html`<${AutoLockSheet} onClose=${() => setSheet(null)} />`}
   <//>`;
 }

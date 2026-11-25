@@ -1,10 +1,13 @@
 // @ts-check
 import { html, useEffect, useState } from '../../../ui/html.js';
-import { useSetting, useTick, useLang, useAction } from '../../../ui/hooks.js';
+import { useSetting, useTick, useLang, useAction, useStore } from '../../../ui/hooks.js';
 import { Screen, Button, LinkButton, List, ListRow, toast } from '../../../ui/kit/index.js';
 import { t, geo, handoff, share, format } from '../../../core/api.js';
 import { sosMessage, contactLink, betterFix, usableFix } from '../logic/message.js';
+import { validateQuick } from '../logic/quick.js';
 import { ContactSheet } from './contact-sheet.js';
+import { QuickSheet } from '../parts/quick-sheet.js';
+import { IncidentSheet } from '../parts/incident-sheet.js';
 
 const canShare = () => typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
@@ -37,6 +40,13 @@ export default function SosScreen() {
   const now = useTick(5000);
   const [contact] = useSetting('sos.contact');
   const [editing, setEditing] = useState(false);
+  const [quick] = useSetting('sos.quick');
+  const [sheet, setSheet] = useState(/** @type {null|'quick'|'incident'} */ (null));
+  // Ticks of the accident card: kept while the screen is open, never stored.
+  const [steps, setSteps] = useState(/** @type {number[]} */ ([]));
+  // 112 and the position message work while moving; a call to the depot waits for a stop.
+  const locked = useStore((s) => s.moving && !s.passenger);
+  const numbers = validateQuick(quick) ? quick : [];
   const best = useBestFix();
   const fix = usableFix(best.fix, now);
 
@@ -73,15 +83,34 @@ export default function SosScreen() {
         <p class="t-caption t-muted" role="status">${caption}</p>
       </div>
       <p class="t-caption t-muted">${t('sos.disclaimer')}</p>
-      <${List}>
-        ${contact
-          ? html`<${ListRow} icon="user" title=${t('sos.contact.current', { name: contact.name })}
-              sub=${`${format.phone(contact.number)} · ${t(`sos.contact.${contact.channel}`)}`} chevron
-              onClick=${() => setEditing(true)} />`
-          : html`<${ListRow} icon="user" title=${t('sos.contact.choose')} sub=${t('sos.contact.chooseSub')} chevron
-              onClick=${() => setEditing(true)} />`}
-      <//>
+      <section class="f-sos-section">
+        <h2 class="section-title">${t('sos.quick.title')}</h2>
+        ${numbers.length > 0
+          ? html`<${List} label=${t('sos.quick.title')}>
+              ${numbers.map((q) => html`<${ListRow} key=${`${q.number} ${q.name}`} icon="phone" tone="info"
+                title=${q.name} sub=${format.phone(q.number)} href=${handoff.telUrl(q.number)}
+                disabled=${locked} dim=${locked} />`)}
+            <//>`
+          : html`<p class="t-body-m t-muted">${t('sos.quick.hint')}</p>`}
+        <${Button} variant="secondary" icon=${numbers.length > 0 ? 'pencil' : 'plus'}
+          label=${t(numbers.length > 0 ? 'sos.quick.edit' : 'sos.quick.add')} onClick=${() => setSheet('quick')} />
+      </section>
+      <div class="f-sos-steps">
+        <${List}>
+          <${ListRow} icon="clipboard-list" tone="warning" title=${t('sos.incident.title')}
+            sub=${t('sos.incident.rowSub')} chevron onClick=${() => setSheet('incident')} />
+          ${contact
+            ? html`<${ListRow} icon="user" title=${t('sos.contact.current', { name: contact.name })}
+                sub=${`${format.phone(contact.number)} · ${t(`sos.contact.${contact.channel}`)}`} chevron
+                onClick=${() => setEditing(true)} />`
+            : html`<${ListRow} icon="user" title=${t('sos.contact.choose')} sub=${t('sos.contact.chooseSub')} chevron
+                onClick=${() => setEditing(true)} />`}
+        <//>
+      </div>
     </div>
     ${editing && html`<${ContactSheet} contact=${contact} onClose=${() => setEditing(false)} />`}
+    ${sheet === 'quick' && html`<${QuickSheet} numbers=${numbers} onClose=${() => setSheet(null)} />`}
+    ${sheet === 'incident' && html`<${IncidentSheet} done=${steps} onChange=${setSteps}
+      onClose=${() => setSheet(null)} />`}
   <//>`;
 }

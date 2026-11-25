@@ -21,6 +21,7 @@ export default {
   'turno.lastAlert': 'Last alert: {title}, {dist}',
   'turno.tile.break': 'Break',
   'turno.tile.report': 'Report',
+  'turno.tools': 'Tools',
   'turno.briefing.title': 'Watch out today',
   'turno.briefing.started': 'Started at {time}',
   'turno.briefing.change': 'Change',

@@ -56,11 +56,13 @@ export function isLocked() {
 
 /**
  * Second tap of "Nota qui": saves, plays the cue, offers the undo.
- * @param {{lat:number, lon:number, acc:number|null, at:number}} pos @param {string} cat
+ * @param {{lat:number, lon:number, acc:number|null, at:number, here?:boolean}} pos `here`: the
+ *   courier's own position (not a point picked on the map) @param {string} cat
  */
 export async function saveNote(pos, cat) {
   const first = (await notes.countNotes()) === 0;
-  const note = await notes.createNote({ lat: pos.lat, lon: pos.lon, acc: pos.acc, cat, at: pos.at });
+  const note = await notes.createNote({ lat: pos.lat, lon: pos.lon, acc: pos.acc, cat, at: pos.at,
+    here: pos.here === true });
   cues.playCue('saved');
   cues.haptic('saved');
   toast(t(first ? 'note.saved.first' : 'note.saved.toast'), {

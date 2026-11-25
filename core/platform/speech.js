@@ -28,7 +28,21 @@ export function voiceInfo(lang) {
   return v ? { name: v.name, local: true } : null;
 }
 
+let watching = false;
+
+/**
+ * Voices load late on many phones: the first look can find none. When the list arrives the tag
+ * "Voce no" must turn into "Voce sì" by itself, not at the next tap.
+ */
+function watchVoices() {
+  const s = synth();
+  if (watching || !s || typeof s.addEventListener !== 'function') return;
+  watching = true;
+  s.addEventListener('voiceschanged', sync);
+}
+
 function sync() {
+  watchVoices();
   let voice = 'ok';
   if (!settings.get('voice.on')) voice = 'off';
   else if (!synth() || !voiceInfo(getLang())) voice = 'none';

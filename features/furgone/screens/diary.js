@@ -12,8 +12,10 @@ import {
 } from '../../../core/api.js';
 import {
   CORNERS, EXTRA, MAX_EXTRA, validateVan, newSession, stampText, photoFileName, nextCorner, extraCount,
-  canAddExtra, addPhoto, currentSession, defaultKind, groupByDay, oldPhotos, sessionBytes,
+  canAddExtra, addPhoto, currentSession, defaultKind, groupByDay, oldPhotos, sessionBytes, withChecks,
 } from '../logic/van.js';
+import { checksSummary } from '../logic/checklist.js';
+import { ChecklistSheet, ChecksList, checksLine } from './checklist-sheet.js';
 
 const PAGE = 30;
 const mb = (bytes) => format.number(Math.round(bytes / 104857.6) / 10, 1);
@@ -102,8 +104,10 @@ function Thumbs({ photos, onOpen }) {
 
 function HistorySheet({ session, onClose }) {
   const shareKit = useSessionShare(session);
+  const hasPhotos = session.photos.length > 0;
   const remove = async () => {
-    const ok = await confirm({ icon: 'trash-2', danger: true, title: t('furgone.deleteTitle'),
+    const ok = await confirm({ icon: 'trash-2', danger: true,
+      title: t(hasPhotos ? 'furgone.deleteTitle' : 'furgone.check.deleteTitle'),
       text: t('furgone.deleteText'), confirm: t('core.action.delete'), cancel: t('furgone.deleteKeep') });
     if (!ok) return;
     // One transaction: no diary record is left pointing at deleted photos.
@@ -111,17 +115,19 @@ function HistorySheet({ session, onClose }) {
       for (const p of session.photos) await tx.del('media', p.mediaId);
       await tx.del('van', session.id);
     });
-    toast(t('furgone.deleted'));
+    toast(t(hasPhotos ? 'furgone.deleted' : 'furgone.check.deleted'));
     onClose();
   };
   return html`<${Sheet} open onClose=${onClose}
     title=${`${format.dateShort(session.at)} · ${t(`furgone.session.${session.kind}`)}`}
     footer=${html`
-      <${Button} block icon="share-2" label=${t('furgone.send')} disabled=${!shareKit.files}
-        busy=${!shareKit.files} onClick=${shareKit.send} />
-      <${Button} block variant="ghost" icon="trash-2" label=${t('furgone.delete')}
+      ${hasPhotos && html`<${Button} block icon="share-2" label=${t('furgone.send')} disabled=${!shareKit.files}
+        busy=${!shareKit.files} onClick=${shareKit.send} />`}
+      <${Button} block variant="ghost" icon="trash-2"
+        label=${t(hasPhotos ? 'furgone.delete' : 'furgone.check.delete')}
         onClick=${() => remove().catch(showError)} />`}>
-    <${Thumbs} photos=${session.photos} onOpen=${shareKit.open} />
+    ${hasPhotos && html`<${Thumbs} photos=${session.photos} onOpen=${shareKit.open} />`}
+    <${ChecksList} checks=${session.checks} />
     <p class="t-caption t-muted">${t('furgone.notProof')}</p>
     ${shareKit.viewer}
   <//>`;
@@ -136,6 +142,9 @@ export default function VanDiary() {
   const [openId, setOpenId] = useState(/** @type {string|null} */ (null));
   const [limit, setLimit] = useState(PAGE);
   const [lastEndedAt, setLastEndedAt] = useState(/** @type {number|null} */ (null));
+  const [checksOpen, setChecksOpen] = useState(false);
+  const draft = useRef(/** @type {Record<string, string>} */ ({}));
+  const saving = useRef(/** @type {Promise<any>} */ (Promise.resolve()));
 
   const live = useLive(['van'], () => db.getAll('van').then(
     (list) => list.map(validateVan).filter(Boolean), warn('read-failed')));
@@ -154,17 +163,37 @@ export default function VanDiary() {
   const kind = picked ?? defaultKind({ shift, lastEndedAt, now });
   const current = currentSession(sessions, kind, shift?.id ?? null, now);
   const photos = current?.photos ?? [];
+  const checks = current?.checks ?? [];
   const next = nextCorner(photos);
   const shareKit = useSessionShare(current);
   const old = oldPhotos(sessions, now);
   const days = groupByDay(sessions);
   const opened = openId ? sessions.find((s) => s.id === openId) : undefined;
 
+  // The session of now, or the one this screen starts. Until the live list shows a session started
+  // here, its id is remembered: a tick and the photo taken right after it land in the same session.
+  const baseSession = (at) => current ?? newSession({ id: (draft.current[kind] ??= crypto.randomUUID()), kind,
+    shiftId: shift?.id ?? null, at });
+  // Ticks are saved one after the other, each with the whole list as it is on screen.
+  const saveChecks = (rows) => {
+    const at = clock.now();
+    const base = baseSession(at);
+    saving.current = saving.current.then(() => db.tx(['van'], 'rw', async (tx) => {
+      const latest = validateVan(await tx.get('van', base.id)) ?? base;
+      const next = validateVan(withChecks(latest, rows, at));
+      if (!next) throw new AppError('van-invalid', 'core.err.save');
+      await tx.put('van', next);
+    })).catch(showError);
+  };
+
   const shootNow = (label) => {
     const at0 = clock.now();
-    const base = current ?? newSession({ id: crypto.randomUUID(), kind, shiftId: shift?.id ?? null, at: at0 });
+    const base = baseSession(at0);
     // The diary record is written before the camera opens: the page may be closed while it is up.
-    const stored = current ? Promise.resolve() : db.put('van', base);
+    // Only if it is not there yet: a session that already holds a checklist is never overwritten.
+    const stored = current ? Promise.resolve() : db.tx(['van'], 'rw', async (tx) => {
+      if (!(await tx.get('van', base.id))) await tx.put('van', base);
+    });
     const shot = camera.takePhoto();
     const where = geo.currentPosition({ timeoutMs: 6000, maxAgeMs: 30000 });
     setBusy(label);
@@ -224,6 +253,11 @@ export default function VanDiary() {
       <${Chip} label=${t('furgone.kind.start')} pressed=${kind === 'start'} onToggle=${() => setPicked('start')} />
       <${Chip} label=${t('furgone.kind.end')} pressed=${kind === 'end'} onToggle=${() => setPicked('end')} />
     <//>
+    <${List}>
+      <${ListRow} icon="clipboard-list" title=${t('furgone.check.title')} chevron
+        sub=${checks.length > 0 ? checksLine(checks) : t('furgone.check.hint')}
+        onClick=${() => setChecksOpen(true)} />
+    <//>
     <${Tiles}>
       ${CORNERS.map(cornerTile)}
       <${Tile} wide icon="plus" label=${t('furgone.extra')} onClick=${shoot(EXTRA)}
@@ -241,7 +275,8 @@ export default function VanDiary() {
       <${List}>
         ${d.sessions.map((s) => html`<${ListRow} key=${s.id} icon="truck" chevron
           title=${t('furgone.session.title', { kind: t(`furgone.session.${s.kind}`), time: format.time(s.at) })}
-          sub=${t('furgone.session.sub', { n: s.photos.length, mb: mb(sessionBytes(s)) })}
+          sub=${[s.photos.length > 0 && t('furgone.session.sub', { n: s.photos.length, mb: mb(sessionBytes(s)) }),
+            s.checks.length > 0 && t('furgone.check.sub', checksSummary(s.checks))].filter(Boolean).join(' · ')}
           onClick=${() => setOpenId(s.id)} />`)}
       <//>
     </section>`)}
@@ -252,6 +287,8 @@ export default function VanDiary() {
       text=${t('furgone.first.text')}
       actions=${[{ label: t('core.action.understood'), variant: 'primary', onClick: understood }]} />`}
     ${opened && html`<${HistorySheet} key=${opened.id} session=${opened} onClose=${() => setOpenId(null)} />`}
+    ${checksOpen && html`<${ChecklistSheet} key=${kind} checks=${checks} onSave=${saveChecks}
+      onClose=${() => setChecksOpen(false)} />`}
     ${shareKit.viewer}
   <//>`;
 }

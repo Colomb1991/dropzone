@@ -70,7 +70,9 @@ function circlePolygon(lat, lon, radiusM) {
 
 const pinFeature = (p) => ({
   type: 'Feature',
-  properties: { id: p.id, tone: TONES.includes(p.tone) ? p.tone : 'neutral', icon: p.icon, dim: p.dim === true },
+  // `num`: a short text drawn in place of the icon (route stops); `big`: a larger disc.
+  properties: { id: p.id, tone: TONES.includes(p.tone) ? p.tone : 'neutral', icon: p.icon, dim: p.dim === true,
+    num: p.num ? String(p.num).slice(0, 3) : '', big: p.big === true },
   geometry: { type: 'Point', coordinates: [p.lon, p.lat] },
 });
 
@@ -130,22 +132,29 @@ export async function createMapLibre(el, opts, timeoutMs) {
   userEl.className = 'map-user';
   const userMarker = new Marker({ element: userEl });
   let userShown = false;
-  const images = new Set();
+  /** @type {Map<string, Promise<void>>} one rasterisation per pin image ('pin-<icon>|<tone>') and style */
+  const images = new Map();
+
+  function ensureIcon(id) {
+    if (!id.startsWith('pin-')) return Promise.resolve();
+    let job = images.get(id);
+    if (!job) {
+      const [icon, tone] = id.slice(4).split('|');
+      job = rasterIcon(icon, cssVar(`--on-tone-${TONES.includes(tone) ? tone : 'neutral'}`)).then((img) => {
+        if (img && !dead && !map.hasImage(id)) map.addImage(id, img, { pixelRatio: 2 });
+      }, () => log.warn('map', 'icon-failed'));
+      images.set(id, job);
+    }
+    return job;
+  }
+  // A pin can be laid out before its icon has been rasterised: the library waits for this promise
+  // instead of drawing the pin without icon and warning about a missing image.
+  map.setMissingStyleImageResolver?.((id) => ensureIcon(String(id)));
 
   async function ensureIcons() {
-    const wanted = new Set(pins.map((p) => `${p.icon}|${TONES.includes(p.tone) ? p.tone : 'neutral'}`));
-    for (const key of wanted) {
-      const id = `pin-${key}`;
-      if (images.has(id) || map.hasImage(id)) continue;
-      images.add(id);
-      const [icon, tone] = key.split('|');
-      try {
-        const img = await rasterIcon(icon, cssVar(`--on-tone-${tone}`));
-        if (img && !dead && !map.hasImage(id)) map.addImage(id, img, { pixelRatio: 2 });
-      } catch (err) {
-        log.warn('map', 'icon-failed');
-      }
-    }
+    const wanted = new Set(pins.filter((p) => !p.num)
+      .map((p) => `pin-${p.icon}|${TONES.includes(p.tone) ? p.tone : 'neutral'}`));
+    await Promise.all([...wanted].map(ensureIcon));
   }
 
   function install() {
@@ -154,26 +163,36 @@ export async function createMapLibre(el, opts, timeoutMs) {
     const toneColor = ['match', ['get', 'tone'], ...TONES.flatMap((n) => [n, cssVar(`--tone-${n}`)]), cssVar('--tone-neutral')];
     map.addSource('acc', { type: 'geojson', data: EMPTY });
     map.addSource('line', { type: 'geojson', data: EMPTY });
-    map.addSource('pins', { type: 'geojson', data: EMPTY, cluster: true, clusterRadius: 40, clusterMaxZoom: 16 });
+    const onTone = ['match', ['get', 'tone'], ...TONES.flatMap((n) => [n, cssVar(`--on-tone-${n}`)]),
+      cssVar('--on-tone-neutral')];
+    const single = ['!', ['has', 'point_count']];
+    const numbered = ['!=', ['get', 'num'], ''];
+    // A numbered route is read pin by pin: its screen asks for no clustering.
+    map.addSource('pins', { type: 'geojson', data: EMPTY, cluster: opts.cluster !== false, clusterRadius: 40,
+      clusterMaxZoom: 16 });
     map.addLayer({ id: 'acc', type: 'fill', source: 'acc',
       paint: { 'fill-color': cssVar('--tone-info'), 'fill-opacity': 0.15 } });
     map.addLayer({ id: 'line', type: 'line', source: 'line', layout: { 'line-cap': 'round' },
       paint: { 'line-color': cssVar('--text'), 'line-width': 4, 'line-dasharray': [1, 2] } });
     map.addLayer({ id: 'clusters', type: 'circle', source: 'pins', filter: ['has', 'point_count'],
       paint: { 'circle-radius': 18, 'circle-color': cssVar('--primary'), 'circle-stroke-width': 2,
-        'circle-stroke-color': cssVar('--surface') } });
+        'circle-stroke-color': cssVar('--pin-ring') } });
     map.addLayer({ id: 'cluster-count', type: 'symbol', source: 'pins', filter: ['has', 'point_count'],
       layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': ['Noto Sans Bold'], 'text-size': 14,
         'text-allow-overlap': true },
       paint: { 'text-color': cssVar('--on-primary') } });
-    map.addLayer({ id: 'pins', type: 'circle', source: 'pins', filter: ['!', ['has', 'point_count']],
-      paint: { 'circle-radius': 14, 'circle-color': toneColor, 'circle-stroke-width': 2,
-        'circle-stroke-color': cssVar('--surface'), 'circle-opacity': ['case', ['get', 'dim'], 0.45, 1],
+    map.addLayer({ id: 'pins', type: 'circle', source: 'pins', filter: single,
+      paint: { 'circle-radius': ['case', ['get', 'big'], 20, 14], 'circle-color': toneColor, 'circle-stroke-width': 2,
+        'circle-stroke-color': cssVar('--pin-ring'), 'circle-opacity': ['case', ['get', 'dim'], 0.45, 1],
         'circle-stroke-opacity': ['case', ['get', 'dim'], 0.45, 1] } });
-    map.addLayer({ id: 'pin-icons', type: 'symbol', source: 'pins', filter: ['!', ['has', 'point_count']],
+    map.addLayer({ id: 'pin-icons', type: 'symbol', source: 'pins', filter: ['all', single, ['!', numbered]],
       layout: { 'icon-image': ['concat', 'pin-', ['get', 'icon'], '|', ['get', 'tone']], 'icon-size': 1,
         'icon-allow-overlap': true, 'icon-ignore-placement': true },
       paint: { 'icon-opacity': ['case', ['get', 'dim'], 0.45, 1] } });
+    map.addLayer({ id: 'pin-nums', type: 'symbol', source: 'pins', filter: ['all', single, numbered],
+      layout: { 'text-field': ['get', 'num'], 'text-font': ['Noto Sans Bold'],
+        'text-size': ['case', ['get', 'big'], 18, 14], 'text-allow-overlap': true, 'text-ignore-placement': true },
+      paint: { 'text-color': onTone, 'text-opacity': ['case', ['get', 'dim'], 0.45, 1] } });
     draw();
   }
 

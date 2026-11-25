@@ -60,6 +60,20 @@ export function matchRoute(path, patterns) {
   return best;
 }
 
+/**
+ * How deep in the app's own history the entry now shown is. The router numbers every entry it sees
+ * (`history.state.dz`): an entry that already carries a number keeps it (the user went back or
+ * forward with the system buttons), a new one is one deeper than the last.
+ * @param {number} prevDepth depth of the entry shown before; -1 before the first one
+ * @param {unknown} state `history.state` of the entry now shown
+ * @returns {{depth:number, stamp:boolean}} stamp = the entry must be numbered
+ */
+export function entryDepth(prevDepth, state) {
+  const dz = state !== null && typeof state === 'object' ? /** @type {any} */ (state).dz : undefined;
+  if (Number.isInteger(dz) && dz >= 0) return { depth: dz, stamp: false };
+  return { depth: Math.max(-1, prevDepth) + 1, stamp: true };
+}
+
 /** '#/note/abc?vista=mappa' */
 export function buildHash(path, query) {
   const keys = query ? Object.keys(query) : [];

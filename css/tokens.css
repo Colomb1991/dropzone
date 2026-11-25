@@ -1,6 +1,33 @@
+/* "Notte blu" identity (docs/DESIGN.md, section 0.1). Deep navy, glass cards, light-blue accent.
+   Dark is the default theme. Fonts are vendored (vendor/fonts, OFL-1.1): nothing is fetched from
+   another origin. Both faces stop at weight 700 on purpose, so no rule anywhere can render heavier. */
+
+/* ---------- fonts ---------- */
+@font-face {
+  font-family: "Outfit"; font-style: normal; font-weight: 100 700; font-display: swap;
+  src: url("../vendor/fonts/outfit-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Outfit"; font-style: normal; font-weight: 100 700; font-display: swap;
+  src: url("../vendor/fonts/outfit-latin-ext-wght-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Manrope"; font-style: normal; font-weight: 200 700; font-display: swap;
+  src: url("../vendor/fonts/manrope-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Manrope"; font-style: normal; font-weight: 200 700; font-display: swap;
+  src: url("../vendor/fonts/manrope-latin-ext-wght-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
 :root {
-  /* type */
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  /* type: Outfit for display and headings, Manrope for the interface, system fonts behind both */
+  --font-sans: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Outfit", "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
   --fs-display-xl: 6rem;     --lh-display-xl: 1;
   --fs-display-l: 4rem;      --lh-display-l: 1.05;
@@ -13,13 +40,17 @@
   --fs-label-l: 1.125rem;    --lh-label-l: 1.2;
   --fs-label-m: 1rem;        --lh-label-m: 1.25;
   --fs-caption: 0.875rem;    --lh-caption: 1.4;
+  --fs-overline: 0.8125rem;  --lh-overline: 1.35;
+  --ls-display: -.03em; --ls-title: -.02em; --ls-overline: .14em;
+  /* weights: light display, regular titles, medium interface. "hc" steps every one of them up */
+  --fw-display: 300; --fw-title: 400; --fw-body: 500; --fw-strong: 600; --fw-bold: 700;
 
   /* space */
   --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px; --sp-5: 20px;
   --sp-6: 24px; --sp-8: 32px; --sp-10: 40px; --sp-12: 48px; --sp-16: 64px;
 
   /* radius */
-  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px; --r-2xl: 32px; --r-pill: 999px;
+  --r-sm: 10px; --r-md: 14px; --r-lg: 18px; --r-xl: 24px; --r-2xl: 32px; --r-pill: 999px;
 
   /* sizes */
   --tap-min: 48px; --tap: 56px; --tap-drive: 72px;
@@ -36,60 +67,85 @@
   --z-nav: 10; --z-banner: 20; --z-sheet: 30; --z-dialog: 40; --z-toast: 50; --z-alert: 60;
 }
 
-/* ---------- light (default) ---------- */
+/* ---------- dark (default): navy, glass, light blue ---------- */
 :root,
-[data-theme="light"] {
-  color-scheme: light;
-  --bg: #EEEEEE; --surface: #FFFFFF; --surface-2: #DDDDDD;
-  --text: #111111; --text-2: #444444; --text-3: #555555;
-  --border: #BBBBBB; --border-strong: #777777; --border-w: 1px;
-  --primary: #111111; --on-primary: #CCFF00; --primary-pressed: #333333;
-  --accent-text: #335500; --focus: #0044BB;
-  --inverse-bg: #111111; --inverse-text: #FFFFFF;
-  --scrim: rgb(0 0 0 / .6);
-  --shadow-1: 0 1px 2px rgb(0 0 0 / .16);
-  --shadow-2: 0 4px 12px rgb(0 0 0 / .18);
-  --shadow-3: 0 12px 32px rgb(0 0 0 / .28);
-
-  --tone-danger: #AA1111;  --on-tone-danger: #FFFFFF;  --tone-danger-text: #AA1111;  --tone-danger-soft: #FFDDDD;
-  --tone-warning: #FFBB00; --on-tone-warning: #111111; --tone-warning-text: #774400; --tone-warning-soft: #FFEEBB;
-  --tone-info: #0044BB;    --on-tone-info: #FFFFFF;    --tone-info-text: #0044BB;    --tone-info-soft: #DDEEFF;
-  --tone-access: #6622CC;  --on-tone-access: #FFFFFF;  --tone-access-text: #6622CC;  --tone-access-soft: #EEDDFF;
-  --tone-success: #006633; --on-tone-success: #FFFFFF; --tone-success-text: #006633; --tone-success-soft: #DDFFDD;
-  --tone-neutral: #333333; --on-tone-neutral: #FFFFFF; --tone-neutral-text: #333333; --tone-neutral-soft: #DDDDDD;
-}
-
-/* ---------- dark ---------- */
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg: #111111; --surface: #222222; --surface-2: #333333;
-  --text: #EEEEEE; --text-2: #BBBBBB; --text-3: #AAAAAA;
-  --border: #444444; --border-strong: #888888; --border-w: 1px;
-  --primary: #CCFF00; --on-primary: #111111; --primary-pressed: #AADD00;
-  --accent-text: #CCFF00; --focus: #FFFFFF;
-  --inverse-bg: #EEEEEE; --inverse-text: #111111;
-  --scrim: rgb(0 0 0 / .7);
+  --bg: #050B1C; --bg-0: rgba(5, 11, 28, 0); --bg-2: #0A1736; --panel: #0C1A3C;
+  --panel-fill: radial-gradient(120% 70% at 50% 0%, rgba(70, 130, 255, .16), rgba(70, 130, 255, 0) 70%) #0C1A3C;
+  --bloom: rgba(70, 130, 255, .26);
+  --surface: rgba(255, 255, 255, .065); --surface-2: rgba(255, 255, 255, .12);
+  --text: #EAF0FF; --text-2: #9FB2DD; --text-3: #8FA2CF;
+  --border: rgba(255, 255, 255, .14); --border-strong: rgba(255, 255, 255, .38); --border-w: 1px;
+  --primary: #DCE5FA; --on-primary: #0A1736; --primary-pressed: #C2CFEE;
+  --primary-fill: linear-gradient(180deg, #E9EEFB, #C9D6F3);
+  --primary-fill-pressed: linear-gradient(180deg, #D6DFF5, #B5C5EA);
+  --accent-text: #8FB2FF; --accent-soft: rgba(143, 178, 255, .16); --focus: #C4D7FF;
+  --switch-on: #8FB2FF; --on-switch: #0A1736;
+  --inverse-bg: #E9EEFB; --inverse-text: #0A1736;
+  --nav-fill: #081026; --nav-glass: rgba(8, 16, 38, .72);
+  --pin-ring: #050B1C;
+  --scrim: rgb(2 5 14 / .72);
   --shadow-1: none;
-  --shadow-2: 0 4px 12px rgb(0 0 0 / .5);
-  --shadow-3: 0 12px 32px rgb(0 0 0 / .6);
+  --shadow-2: 0 8px 24px rgb(0 0 0 / .45);
+  --shadow-3: 0 18px 48px rgb(0 0 0 / .6);
 
-  --tone-danger: #FF7777;  --on-tone-danger: #111111;  --tone-danger-text: #FF7777;  --tone-danger-soft: #441111;
-  --tone-warning: #FFBB00; --on-tone-warning: #111111; --tone-warning-text: #FFBB00; --tone-warning-soft: #443300;
-  --tone-info: #88BBFF;    --on-tone-info: #111111;    --tone-info-text: #88BBFF;    --tone-info-soft: #112244;
-  --tone-access: #CCAAFF;  --on-tone-access: #111111;  --tone-access-text: #CCAAFF;  --tone-access-soft: #331155;
-  --tone-success: #66DD88; --on-tone-success: #111111; --tone-success-text: #66DD88; --tone-success-soft: #113322;
-  --tone-neutral: #DDDDDD; --on-tone-neutral: #111111; --tone-neutral-text: #DDDDDD; --tone-neutral-soft: #333333;
+  --tone-danger: #FF8A7A;  --on-tone-danger: #050B1C;  --tone-danger-text: #FF8A7A;  --tone-danger-soft: rgba(255, 138, 122, .16);
+  --tone-warning: #FFB020; --on-tone-warning: #050B1C; --tone-warning-text: #FFB020; --tone-warning-soft: rgba(255, 176, 32, .15);
+  --tone-info: #8FB2FF;    --on-tone-info: #050B1C;    --tone-info-text: #8FB2FF;    --tone-info-soft: rgba(143, 178, 255, .16);
+  --tone-access: #C9A8FF;  --on-tone-access: #050B1C;  --tone-access-text: #C9A8FF;  --tone-access-soft: rgba(201, 168, 255, .16);
+  --tone-success: #6FE0A8; --on-tone-success: #050B1C; --tone-success-text: #6FE0A8; --tone-success-soft: rgba(111, 224, 168, .14);
+  --tone-neutral: #C4D7FF; --on-tone-neutral: #050B1C; --tone-neutral-text: #C4D7FF; --tone-neutral-soft: rgba(196, 215, 255, .12);
 }
 
-/* ---------- high contrast ("sun") ---------- */
+/* ---------- light: paper and ink ---------- */
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #F4F4F1; --bg-0: rgba(244, 244, 241, 0); --bg-2: #ECECE7; --panel: #FFFFFF;
+  --panel-fill: #FFFFFF;
+  --bloom: rgba(255, 255, 255, 0);
+  --surface: #FFFFFF; --surface-2: #E8E8E3;
+  --text: #16191D; --text-2: #535B64; --text-3: #5F6770;
+  --border: rgba(22, 25, 29, .12); --border-strong: #7E858D; --border-w: 1px;
+  --primary: #16191D; --on-primary: #FFFFFF; --primary-pressed: #2E343B;
+  --primary-fill: #16191D;
+  --primary-fill-pressed: #2E343B;
+  --accent-text: #2F5DA8; --accent-soft: rgba(47, 93, 168, .12); --focus: #2F5DA8;
+  --switch-on: #2F5DA8; --on-switch: #FFFFFF;
+  --inverse-bg: #16191D; --inverse-text: #FFFFFF;
+  --nav-fill: #FFFFFF; --nav-glass: rgba(255, 255, 255, .82);
+  --pin-ring: #FFFFFF;
+  --scrim: rgb(22 25 29 / .5);
+  --shadow-1: 0 1px 2px rgb(22 25 29 / .06);
+  --shadow-2: 0 8px 24px rgb(22 25 29 / .12);
+  --shadow-3: 0 18px 48px rgb(22 25 29 / .22);
+
+  --tone-danger: #A61B14;  --on-tone-danger: #FFFFFF;  --tone-danger-text: #A61B14;  --tone-danger-soft: #FBE3E0;
+  --tone-warning: #FFB020; --on-tone-warning: #16191D; --tone-warning-text: #7A4700; --tone-warning-soft: #FFF0D2;
+  --tone-info: #24509A;    --on-tone-info: #FFFFFF;    --tone-info-text: #2F5DA8;    --tone-info-soft: #E2EBF9;
+  --tone-access: #5A2DB0;  --on-tone-access: #FFFFFF;  --tone-access-text: #5A2DB0;  --tone-access-soft: #EDE5FA;
+  --tone-success: #0A6540; --on-tone-success: #FFFFFF; --tone-success-text: #0A6540; --tone-success-soft: #DCF2E6;
+  --tone-neutral: #2E343B; --on-tone-neutral: #FFFFFF; --tone-neutral-text: #2E343B; --tone-neutral-soft: #E8E8E3;
+}
+
+/* ---------- high contrast ("sole"): black on white, 2 px lines, no brand colour ---------- */
 [data-theme="hc"] {
   color-scheme: light;
-  --bg: #FFFFFF; --surface: #FFFFFF; --surface-2: #EEEEEE;
+  --fw-display: 500; --fw-title: 600; --fw-body: 600; --fw-strong: 700; --fw-bold: 700;
+  --bg: #FFFFFF; --bg-0: #FFFFFF; --bg-2: #FFFFFF; --panel: #FFFFFF;
+  --panel-fill: #FFFFFF;
+  --bloom: rgba(255, 255, 255, 0);
+  --surface: #FFFFFF; --surface-2: #EEEEEE;
   --text: #000000; --text-2: #000000; --text-3: #222222;
   --border: #000000; --border-strong: #000000; --border-w: 2px;
-  --primary: #000000; --on-primary: #CCFF00; --primary-pressed: #333333;
-  --accent-text: #000000; --focus: #003399;
+  --primary: #000000; --on-primary: #FFFFFF; --primary-pressed: #333333;
+  --primary-fill: #000000;
+  --primary-fill-pressed: #333333;
+  --accent-text: #000000; --accent-soft: #FFFFFF; --focus: #003399;
+  --switch-on: #000000; --on-switch: #FFFFFF;
   --inverse-bg: #000000; --inverse-text: #FFFFFF;
+  --nav-fill: #FFFFFF; --nav-glass: #FFFFFF;
+  --pin-ring: #FFFFFF;
   --scrim: rgb(0 0 0 / .8);
   --shadow-1: none; --shadow-2: none; --shadow-3: none;
 

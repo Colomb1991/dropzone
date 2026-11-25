@@ -1,0 +1,9 @@
+/* Frasi pronte. Layout only: every visual primitive comes from the kit. */
+.f-frasi { display: grid; gap: var(--sp-3); align-content: start; }
+.f-frasi-top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.f-frasi-top p { margin: 0; }
+.f-frasi-top .chip { flex: none; }
+/* A phrase and its meaning are read in full, never cut with an ellipsis. */
+.f-frasi .row__title { overflow-wrap: anywhere; }
+.f-frasi .row__sub { display: block; -webkit-line-clamp: unset; overflow: visible; }
+.f-frasi > p { margin: 0; }

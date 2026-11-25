@@ -7,19 +7,21 @@
 .f-imp-card .row { min-height: var(--tap); padding: 0; }
 .f-imp-card .row:active { background: transparent; }
 /* Legal texts and reasons under a toggle are read in full, never cut with an ellipsis. */
-.f-imp .row__sub { white-space: normal; overflow: visible; }
+.f-imp .row__sub { display: block; -webkit-line-clamp: unset; overflow: visible; }
 .f-imp-rule { width: 100%; height: 0; margin: 0; border: 0; border-top: var(--border-w) solid var(--border); }
 .f-imp-art { width: min(100%, 320px); margin: 0 auto; }
 .f-imp .t-title-m { margin: 0; }
-.f-imp-ready { display: flex; align-items: center; gap: var(--sp-2); margin: 0; color: var(--tone-success-text); font-weight: 700; }
+.f-imp-ready { display: flex; align-items: center; gap: var(--sp-2); margin: 0; color: var(--tone-success-text); font-weight: var(--fw-strong); }
 
 .f-imp-diags { display: grid; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
-.f-imp-diag { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); background: var(--surface); border: var(--border-w) solid var(--border); border-left: 6px solid var(--border-strong); border-radius: var(--r-md); }
-.f-imp-diag[data-tone] { border-left-color: var(--tone); }
+/* A row that has been tried carries the short tone bar of a tone card (DESIGN 0.1); hc keeps the full bar. */
+.f-imp-diag { position: relative; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); overflow: hidden; background: var(--surface); border: var(--border-w) solid var(--border); border-radius: var(--r-lg); }
+.f-imp-diag[data-tone]::before { content: ""; position: absolute; inset: var(--sp-3) auto var(--sp-3) 0; width: 4px; border-radius: 0 var(--r-pill) var(--r-pill) 0; background: var(--tone); }
+[data-theme="hc"] .f-imp-diag[data-tone]::before { inset: 0 auto 0 0; width: 6px; border-radius: 0; }
 .f-imp-diag__text { display: grid; gap: 2px; min-width: 0; }
-.f-imp-diag__label { font-size: var(--fs-title-s); line-height: var(--lh-title-s); font-weight: 700; }
+.f-imp-diag__label { font-size: var(--fs-title-s); line-height: var(--lh-title-s); font-weight: var(--fw-strong); }
 .f-imp-diag__hint { color: var(--text-2); font-size: var(--fs-body-m); line-height: var(--lh-body-m); }
-.f-imp-diag__result { display: flex; align-items: flex-start; gap: var(--sp-2); color: var(--tone-text); font-size: var(--fs-body-m); line-height: var(--lh-body-m); font-weight: 600; overflow-wrap: anywhere; }
+.f-imp-diag__result { display: flex; align-items: flex-start; gap: var(--sp-2); color: var(--tone-text); font-size: var(--fs-body-m); line-height: var(--lh-body-m); font-weight: var(--fw-strong); overflow-wrap: anywhere; }
 .f-imp-diag__result .icon { width: 20px; height: 20px; margin-top: 2px; }
 .f-imp-diag__wide { grid-column: 1 / -1; }
 .f-imp-diag .btn { min-height: var(--tap-min); padding: 0 var(--sp-4); font-size: var(--fs-label-m); }

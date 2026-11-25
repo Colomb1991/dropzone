@@ -6,6 +6,8 @@ import { t, tn, shifts, share, format, router, clock } from '../../../core/api.j
 import { monthSummary, monthRange } from '../logic/hours.js';
 import { monthCsv, csvFileName } from '../logic/csv.js';
 import { EditSheet } from './edit-sheet.js';
+import { ymKey, comparePayslip } from '../logic/payslip.js';
+import { PayslipSheet, diffText } from './payslip-sheet.js';
 
 const ymOf = (ts) => {
   const d = new Date(ts);
@@ -37,6 +39,8 @@ export default function OreScreen() {
   const [breakPaid] = useSetting('contract.breakPaid');
   /** null = closed, 'add', or the shift being edited */
   const [editing, setEditing] = useState(/** @type {any} */ (null));
+  const [payslips] = useSetting('ore.payslip');
+  const [paying, setPaying] = useState(false);
 
   const live = useLive(['shifts'], () => {
     const r = monthRange(ym.y, ym.m);
@@ -61,6 +65,9 @@ export default function OreScreen() {
   const cur = ymOf(now);
   const isCurrent = ym.y === cur.y && ym.m === cur.m;
   const dur = format.duration;
+  // Hours of the payslip of this month, when the courier has typed them (SPEC 11).
+  const payslip = payslips?.[ymKey(ym.y, ym.m)] ?? null;
+  const paid = payslip ? comparePayslip(sum.workedMs, payslip) : null;
 
   return html`<${Screen} title=${t('ore.title')} back="/altro">
     <div class="stack">
@@ -87,9 +94,13 @@ export default function OreScreen() {
         <${ListRow} icon="settings" title=${t('ore.contract.set')} sub=${t('ore.contract.setSub')} chevron
           href=${router.href('/impostazioni')} />
       <//>`}
+      ${paid && html`<${List}>
+        <${ListRow} icon="clipboard-list" title=${diffText(paid)}
+          sub=${t('ore.pay.row', { d: dur(paid.payslipMin * 60000) })} chevron onClick=${() => setPaying(true)} />
+      <//>`}
 
       ${sum.weeks.map((w) => html`
-        <h3 class="section-title">
+        <h3 class="section-title f-ore-week">
           ${t('ore.week.head', { d: dur(w.workedMs),
             range: t('ore.week.range', { from: format.dateShort(w.startAt), to: format.dateShort(w.lastDay) }) })}
           ${w.endsInMonth && w.overMs > 0 ? ` · ${t('ore.over', { d: dur(w.overMs) })}` : ''}
@@ -102,9 +113,13 @@ export default function OreScreen() {
         <${Button} variant="secondary" block icon="plus" label=${t('ore.add')} onClick=${() => setEditing('add')} />
         <${Button} variant="secondary" block icon="file-down" label=${t('ore.export')} disabled=${!canExport}
           reason=${t('ore.export.none')} busy=${exportCsv.busy} onClick=${exportCsv.run} />
+        <${Button} variant="secondary" block icon="clipboard-list" label=${t('ore.pay.open')}
+          onClick=${() => setPaying(true)} />
         <p class="t-caption t-muted">${t('ore.notProof')} ${t('ore.rules')}</p>
       </div>
     </div>
+    ${paying && html`<${PayslipSheet} key=${ymKey(ym.y, ym.m)} ym=${ym} workedMs=${sum.workedMs}
+      onClose=${() => setPaying(false)} />`}
     ${editing && html`<${EditSheet} shift=${editing === 'add' ? null : editing} ym=${ym} now=${now}
       onClose=${() => setEditing(null)} />`}
   <//>`;

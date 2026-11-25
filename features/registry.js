@@ -1,5 +1,6 @@
 // @ts-check
-// The only place the app learns about features. Release 1: 12 folders, static list.
+// The only place the app learns about features. Release 1: 12 folders, static list. Release 2 adds
+// them one by one, starting with `giro`.
 import turno from './turno/feature.js';
 import ore from './ore/feature.js';
 import sos from './sos/feature.js';
@@ -12,16 +13,25 @@ import benvenuto from './benvenuto/feature.js';
 import legale from './legale/feature.js';
 import demo from './demo/feature.js';
 import furgone from './furgone/feature.js';
+import giro from './giro/feature.js';
+import furgoneQui from './furgone-qui/feature.js';
+import frasi from './frasi/feature.js';
+import invita from './invita/feature.js';
+import meteo from './meteo/feature.js';
+import ritmo from './ritmo/feature.js';
 import { matchRoute } from '../core/pure/route-match.js';
 
 export const FEATURE_IDS = ['turno', 'ore', 'sos', 'note', 'segnala', 'zona', 'vicino', 'impostazioni',
-  'benvenuto', 'legale', 'demo', 'furgone'];
+  'benvenuto', 'legale', 'demo', 'furgone', 'giro',
+  'furgone-qui', 'frasi', 'invita', 'meteo',
+  'ritmo'];
 
 export const FEATURES = [turno, ore, sos, note, segnala, zona, vicino, impostazioni, benvenuto, legale,
-  demo, furgone];
+  demo, furgone, giro, furgoneQui, frasi, invita, meteo,
+  ritmo];
 
-export const SLOT_NAMES = ['home.idle', 'home.tiles', 'home.shift', 'home.sticky', 'briefing', 'shift.end',
-  'map.pins', 'diagnostics', 'data.counts', 'overlay'];
+export const SLOT_NAMES = ['home.idle', 'home.tiles', 'home.shift', 'home.sticky', 'shift.context', 'shift.tools',
+  'briefing', 'shift.end', 'map.pins', 'diagnostics', 'data.counts', 'overlay'];
 
 /**
  * Checks every manifest (ARCHITECTURE 5.2). Pure: also run by tests/audit.

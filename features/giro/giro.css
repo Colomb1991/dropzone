@@ -1,0 +1,60 @@
+/* Layout of the route planner; every visual primitive comes from the kit. Tokens only, "Notte blu"
+   (DESIGN 0.1): numbers and headings in the display face, glass cards with a hairline, weights from
+   the tokens. */
+
+/* ---------- progress ---------- */
+.f-giro-progress { display: grid; gap: var(--sp-2); }
+.f-giro-progress__row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
+.f-giro-progress__count { margin: 0; font-family: var(--font-display); font-size: var(--fs-title-m); line-height: var(--lh-title-m); font-weight: var(--fw-title); letter-spacing: var(--ls-title); color: var(--text-2); }
+.f-giro-progress__count strong { font-size: var(--fs-display-m); line-height: var(--lh-display-m); font-weight: var(--fw-display); letter-spacing: var(--ls-display); color: var(--text); }
+.f-giro-progress__left { margin: 0; text-align: right; font-size: var(--fs-caption); line-height: var(--lh-caption); font-weight: var(--fw-strong); color: var(--text-2); }
+.f-giro-bar { height: 12px; overflow: hidden; background: var(--surface-2); border-radius: var(--r-pill); }
+[data-theme="hc"] .f-giro-bar { border: 2px solid var(--border); }
+.f-giro-bar__fill { display: block; height: 100%; min-width: 0; background: var(--switch-on); border-radius: var(--r-pill); transition: width var(--dur-2) var(--ease-out); }
+
+/* ---------- the next stop ---------- */
+.f-giro-next { display: grid; gap: var(--sp-4); padding: var(--sp-4); background: var(--surface); border: var(--border-w) solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-1); }
+.f-giro-next__head { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: var(--sp-3); }
+.f-giro-next__kicker { margin: 0; font-size: var(--fs-overline); line-height: var(--lh-overline); font-weight: var(--fw-strong); letter-spacing: var(--ls-overline); text-transform: uppercase; color: var(--text-2); }
+.f-giro-next__label { margin: 0; font-family: var(--font-display); font-size: var(--fs-title-l); line-height: var(--lh-title-l); font-weight: var(--fw-title); letter-spacing: var(--ls-title); overflow-wrap: anywhere; }
+.f-giro-next__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); margin: var(--sp-1) 0 0; font-weight: var(--fw-strong); color: var(--text-2); }
+.f-giro-next .btn-row { grid-auto-columns: minmax(0, 1fr); }
+.f-giro-num { font-size: var(--fs-label-m); font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; }
+.f-giro-num--next { display: grid; place-items: center; min-width: 64px; height: 64px; padding: 0 var(--sp-2); font-family: var(--font-display); font-size: var(--fs-title-l); font-weight: var(--fw-title); background: var(--primary-fill); color: var(--on-primary); border-radius: var(--r-lg); }
+
+/* ---------- what I know here ---------- */
+.f-giro-known { display: grid; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+.f-giro-known__item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--sp-2); min-height: var(--tap-min); padding: var(--sp-2) var(--sp-3); background: var(--tone-soft); color: var(--text); border: var(--border-w) solid var(--border); border-radius: var(--r-md); font-weight: var(--fw-strong); text-decoration: none; }
+[data-theme="hc"] .f-giro-known__item { border: 2px solid var(--tone-text); border-left-width: 6px; }
+.f-giro-known__item > .icon:first-child { color: var(--tone-text); }
+.f-giro-known__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.f-giro-icons { display: inline-flex; gap: var(--sp-1); }
+.f-giro-icons > span { display: inline-grid; color: var(--tone-text); }
+.f-giro-icons .icon { width: 20px; height: 20px; }
+
+/* ---------- lists ---------- */
+.f-giro-actions { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-3); }
+.f-giro-section { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+.f-giro-section .section-title { margin: 0; }
+.f-giro-foot { display: grid; gap: var(--sp-3); justify-items: start; margin-top: var(--sp-3); }
+.f-giro-finish { display: grid; justify-items: center; gap: var(--sp-2); padding: var(--sp-6) var(--sp-4); text-align: center; background: var(--surface); border: var(--border-w) solid var(--border); border-radius: var(--r-lg); }
+.f-giro-finish .icon { color: var(--tone-success-text); }
+.f-giro-finish p { margin: 0; color: var(--text-2); }
+.f-giro-finish .f-giro-finish__title { font-family: var(--font-display); font-size: var(--fs-title-l); line-height: var(--lh-title-l); font-weight: var(--fw-title); letter-spacing: var(--ls-title); color: var(--text); }
+/* The map leaves room for the next stop under it. */
+.f-giro-map .map { height: min(42dvh, 400px); min-height: 260px; }
+.f-giro-mapbar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: var(--sp-2); }
+.f-giro-mapbar .btn { padding-left: var(--sp-3); padding-right: var(--sp-3); }
+.f-giro-mapbar .btn--icon { padding: 0; }
+.f-giro-sheet { display: grid; gap: var(--sp-3); }
+.f-giro-sheet__label { margin: 0; font-family: var(--font-display); font-size: var(--fs-title-m); line-height: var(--lh-title-m); font-weight: var(--fw-title); letter-spacing: var(--ls-title); overflow-wrap: anywhere; }
+
+/* ---------- adding stops ---------- */
+.f-giro-modes { display: flex; gap: var(--sp-2); overflow-x: auto; margin: 0 calc(var(--sp-4) * -1); padding: 0 var(--sp-4) var(--sp-1); scrollbar-width: none; }
+.f-giro-modes::-webkit-scrollbar { display: none; }
+.f-giro-modes .chip { flex: none; white-space: nowrap; }
+.f-giro-paste textarea { min-height: 176px; }
+.f-giro-result { display: grid; gap: var(--sp-2); padding: var(--sp-4); background: var(--surface); border: var(--border-w) solid var(--border); border-radius: var(--r-lg); }
+.f-giro-result p { margin: 0; }
+.f-giro-result__line { display: flex; align-items: center; gap: var(--sp-2); font-weight: var(--fw-strong); }
+.f-giro-result__line .icon { color: var(--tone-text); }

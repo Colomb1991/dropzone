@@ -13,7 +13,7 @@ export default {
   'ui.stub.text': 'Questa parte è in costruzione. Arriva con il prossimo aggiornamento.',
   'ui.second.text': 'Usa quella. Qui funzionano solo SOS e le pagine legali.',
   'ui.share.text': 'Ti mando Dropzone: si ricorda la zona e ti avvisa quando ci ripassi. Poi ti passo la mia zona.',
-  'ui.share.sub': 'Manda il link dell\'app',
+  'ui.share.sub': 'Codice QR e link dell\'app',
   'ui.more.passenger': 'Sono passeggero',
   'ui.more.passengerSub': 'Sblocca i tasti per questo turno',
   'ui.more.passengerText': 'Non stai guidando? Sblocco i tasti solo se il telefono lo usa un passeggero. Chi guida non tocca.',

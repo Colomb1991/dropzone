@@ -34,7 +34,7 @@ export default {
 
   'benvenuto.s1.title': 'Ciao, sono Dropzone.',
   'benvenuto.s1.p1': 'Ricordo quello che sai della tua zona e ti avviso quando ci ripassi.',
-  'benvenuto.s1.p2': 'Non sono l\'app della tua azienda: non leggo giri, pacchi o etichette.',
+  'benvenuto.s1.p2': 'Non sono l\'app della tua azienda: non leggo i suoi giri, pacchi o etichette.',
   'benvenuto.s1.p3': 'Non sono collegata a nessun corriere.',
 
   'benvenuto.s2.title': 'Le tue note restano sul telefono.',
@@ -68,7 +68,7 @@ export default {
 
   'benvenuto.s5.title': 'Ultime due cose.',
   'benvenuto.s5.location': 'A inizio turno ti chiedo la posizione: su iPhone succede ogni giorno, tocca «Consenti».',
-  'benvenuto.s5.install': 'Installa l\'app:',
+  'benvenuto.s5.install': 'Installa l\'app',
   'benvenuto.s5.android': 'Tocca «Installa». Se non lo vedi: menu ⋮ → «Installa app».',
   'benvenuto.s5.offline': 'Pronta anche senza rete',
   'benvenuto.s5.accept': 'Toccando «Inizia» accetti i [[terms|Termini d\'uso]] e confermi di aver letto l\'[[privacy|Informativa privacy]]. Hai almeno 18 anni.',

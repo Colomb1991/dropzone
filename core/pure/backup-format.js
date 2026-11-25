@@ -118,6 +118,38 @@ export function upgradeRecord(def, rec, fromSchema, toSchema) {
 }
 
 /**
+ * Media ids a record cannot live without (StoreDef.mediaRefs; the van diary names its photos).
+ * @param {{mediaRefs?:(r:any)=>unknown}} def @param {object} rec @returns {string[]}
+ */
+export function mediaRefsOf(def, rec) {
+  if (typeof def?.mediaRefs !== 'function') return [];
+  try {
+    const ids = def.mediaRefs(rec);
+    return Array.isArray(ids) ? ids.filter((id) => typeof id === 'string' && id !== '') : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+/**
+ * Export only what can be restored whole: a record that points at media the file leaves out
+ * (van photos, when the courier did not include them) is left out with them.
+ * @param {{mediaRefs?:(r:any)=>unknown}} def @param {object} rec @param {{has(id:string):boolean}} leftOut
+ */
+export function exportsWhole(def, rec, leftOut) {
+  return !mediaRefsOf(def, rec).some((id) => leftOut.has(id));
+}
+
+/**
+ * Restore only what arrives whole: every media a record needs is in the file or already on the
+ * phone. Guards files made before the export rule above existed.
+ * @param {{mediaRefs?:(r:any)=>unknown}} def @param {object} rec @param {(id:string)=>boolean} hasMedia
+ */
+export function restoresWhole(def, rec, hasMedia) {
+  return mediaRefsOf(def, rec).every((id) => hasMedia(id));
+}
+
+/**
  * Merge rule (SPEC 4.8): missing → add; settings → local wins; `updatedAt` on both → newer wins;
  * otherwise keep local.
  * @returns {'add'|'update'|'skip'}

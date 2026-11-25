@@ -8,7 +8,7 @@ import * as log from '../log.js';
 import { now } from '../clock.js';
 import { AppError } from '../errors.js';
 import { round } from '../pure/geo-math.js';
-import { SERVICES, OVERPASS_AMENITIES, OVERPASS_SHOPS } from './services.js';
+import { SERVICES, PHOTON, WEATHER, OVERPASS_AMENITIES, OVERPASS_SHOPS } from './services.js';
 
 /** @typedef {import('./services.js').ServiceId} ServiceId */
 /** @typedef {'ok'|'user-off'|'sandbox'|'offline'} ServiceReason */
@@ -46,6 +46,8 @@ let inflight = new Map();
 /** @type {Map<string, number>} */
 let lastTry = new Map();
 let backoffUntil = 0;
+let photonLastAt = -Infinity;
+let weatherLastAt = -Infinity;
 
 /** Tests only: inject a fake transport and state; resets counters and caches. */
 export function _setDeps(over) {
@@ -55,6 +57,8 @@ export function _setDeps(over) {
   inflight = new Map();
   lastTry = new Map();
   backoffUntil = 0;
+  photonLastAt = -Infinity;
+  weatherLastAt = -Infinity;
 }
 
 function count(id, failed) {
@@ -133,6 +137,39 @@ export function overpassQuery(cellId) {
     + 'out center tags qt 1500;';
 }
 
+/** The text as it is sent to Photon: no control characters, single spaces. */
+export function photonText(text) {
+  return String(text ?? '').replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Fixed request: only the text and the bias vary, and the bias is rounded here to 1 decimal
+ * (about 10 km), so no caller can send a finer position.
+ * @param {string} text already cleaned @param {{lat:number, lon:number}|null} [bias]
+ */
+export function photonUrl(text, bias) {
+  let url = `${SERVICES.photon.endpoints[0]}?q=${encodeURIComponent(text)}&limit=${PHOTON.limit}&lang=${PHOTON.lang}`;
+  if (bias && Number.isFinite(bias.lat) && Number.isFinite(bias.lon) && Math.abs(bias.lat) <= 90
+    && Math.abs(bias.lon) <= 180) {
+    url += `&lat=${round(bias.lat, PHOTON.biasDecimals)}&lon=${round(bias.lon, PHOTON.biasDecimals)}`;
+  }
+  return url;
+}
+
+/**
+ * Fixed request: only the position varies, and it is rounded here to 1 decimal (about 10 km), so no
+ * caller can send a finer one. An impossible position is refused.
+ * @param {number} lat @param {number} lon
+ */
+export function weatherUrl(lat, lon) {
+  if (typeof lat !== 'number' || typeof lon !== 'number' || !Number.isFinite(lat) || !Number.isFinite(lon)
+    || Math.abs(lat) > 90 || Math.abs(lon) > 180) throw new NetError('blocked', 'weather');
+  // `+ 0` turns a rounded -0 into 0.
+  return `${SERVICES.weather.endpoints[0]}?latitude=${round(lat, WEATHER.decimals) + 0}`
+    + `&longitude=${round(lon, WEATHER.decimals) + 0}&hourly=${WEATHER.hourly.join(',')}`
+    + `&forecast_hours=${WEATHER.hours}&timeformat=unixtime`;
+}
+
 // ---- operations ----
 
 /**
@@ -182,6 +219,80 @@ export async function overpassCell(cellId, opts = {}) {
   })();
   inflight.set(cellId, job);
   const clear = () => inflight.delete(cellId);
+  job.then(clear, clear);
+  return job;
+}
+
+/**
+ * Address search for the route planner (Photon, OpenStreetMap data). Sends the typed text and, when
+ * given, a position rounded to 1 decimal. At most one request every 400 ms; identical questions are
+ * answered from memory for 5 minutes.
+ * @param {string} text 3 to 120 characters
+ * @param {{lat:number, lon:number}|null} [bias] @param {{signal?:AbortSignal}} [opts]
+ * @returns {Promise<{features: object[]}>}
+ */
+export async function photonSearch(text, bias = null, opts = {}) {
+  const q = photonText(text);
+  if (q.length < PHOTON.minChars || q.length > PHOTON.maxChars) throw new NetError('blocked', 'photon');
+  check('photon');
+  const url = photonUrl(q, bias);
+  const key = `photon|${url}`;
+  const t = deps.now();
+  const hit = cache.get(key);
+  if (hit && t - hit.at < PHOTON.cacheMs) return hit.value;
+  const running = inflight.get(key);
+  if (running) return running;
+  if (t - photonLastAt < PHOTON.minIntervalMs) throw new NetError('rate-limited', 'photon');
+  photonLastAt = t;
+  const job = (async () => {
+    const res = await send('photon', url, { method: 'GET' }, SERVICES.photon.timeoutMs, opts.signal);
+    if (!res.ok) throw new NetError(res.status === 429 ? 'rate-limited' : 'http', 'photon', res.status);
+    const json = await readJson('photon', res);
+    if (!json || !Array.isArray(json.features)) throw new NetError('bad-response', 'photon');
+    const value = { features: json.features.slice(0, PHOTON.limit) };
+    cache.set(key, { at: deps.now(), value });
+    return value;
+  })();
+  inflight.set(key, job);
+  const clear = () => inflight.delete(key);
+  job.then(clear, clear);
+  return job;
+}
+
+/**
+ * Forecast of the next hours for the shift briefing (Open-Meteo). Sends the position rounded to
+ * 1 decimal and nothing else. One answer per rounded position is kept in memory for 60 minutes; a
+ * new position is asked at most once a minute.
+ * @param {number} lat @param {number} lon @param {{signal?:AbortSignal}} [opts]
+ * @returns {Promise<{lat:number, lon:number, hourly:Record<string, number[]>}>} `lat`/`lon`: the rounded
+ *   position that was sent; `hourly.time` in epoch seconds, plus the fixed lists of WEATHER.hourly
+ */
+export async function weatherForecast(lat, lon, opts = {}) {
+  const url = weatherUrl(lat, lon);
+  check('weather');
+  const key = `weather|${url}`;
+  const t = deps.now();
+  const hit = cache.get(key);
+  if (hit && t - hit.at < WEATHER.cacheMs) return hit.value;
+  const running = inflight.get(key);
+  if (running) return running;
+  if (t - weatherLastAt < WEATHER.minIntervalMs) throw new NetError('rate-limited', 'weather');
+  weatherLastAt = t;
+  const job = (async () => {
+    const res = await send('weather', url, { method: 'GET' }, SERVICES.weather.timeoutMs, opts.signal);
+    if (!res.ok) throw new NetError(res.status === 429 ? 'rate-limited' : 'http', 'weather', res.status);
+    const json = await readJson('weather', res);
+    const h = json?.hourly;
+    if (!h || typeof h !== 'object' || !Array.isArray(h.time)) throw new NetError('bad-response', 'weather');
+    /** @type {Record<string, number[]>} */
+    const hourly = { time: h.time.slice(0, 48) };
+    for (const name of WEATHER.hourly) hourly[name] = Array.isArray(h[name]) ? h[name].slice(0, 48) : [];
+    const value = { lat: round(lat, WEATHER.decimals) + 0, lon: round(lon, WEATHER.decimals) + 0, hourly };
+    cache.set(key, { at: deps.now(), value });
+    return value;
+  })();
+  inflight.set(key, job);
+  const clear = () => inflight.delete(key);
   job.then(clear, clear);
   return job;
 }
@@ -243,6 +354,6 @@ export async function probe(id) {
 /** Requests of this session, per service; shown in Diagnostics. */
 export function stats() {
   const out = {};
-  for (const id of ['tiles', 'overpass', 'local']) out[id] = { ...(counters[id] ?? { requests: 0, errors: 0, lastAt: null }) };
+  for (const id of ['tiles', 'overpass', 'photon', 'weather', 'local']) out[id] = { ...(counters[id] ?? { requests: 0, errors: 0, lastAt: null }) };
   return out;
 }

@@ -98,6 +98,21 @@ export function itemsForChip(chip, items, here, limit = LIST_LIMIT) {
   return [...main, ...extra].slice(0, limit);
 }
 
+export const PAUSA_LIMIT = 8;
+
+/**
+ * "Pausa qui" (SPEC 4.2): toilets and bars together, each nearest first. The courier's own spots
+ * are listed above them by the screen.
+ * @param {Poi[]} items @param {{lat:number, lon:number}} here @param {number} [limit]
+ * @returns {{chip:'bagni'|'bar', places:(Poi & {distM:number, likely:boolean})[]}[]}
+ */
+export function pausaSections(items, here, limit = PAUSA_LIMIT) {
+  return [
+    { chip: 'bagni', places: itemsForChip('bagni', items, here, limit) },
+    { chip: 'bar', places: itemsForChip('bar', items, here, limit) },
+  ];
+}
+
 /** Own notes of category `bagno`, nearest first. */
 export function ownSpots(notes, here) {
   return notes.filter((n) => n.cat === 'bagno')

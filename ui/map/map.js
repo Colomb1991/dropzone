@@ -5,14 +5,16 @@ import * as store from '../../core/store.js';
 import * as settings from '../../core/settings.js';
 import { AppError } from '../../core/errors.js';
 
-/** @typedef {{id:string, lat:number, lon:number, tone:string, icon:string, label?:string, dim?:boolean}} MapPin */
+/** @typedef {{id:string, lat:number, lon:number, tone:string, icon:string, label?:string, dim?:boolean,
+ *   num?:string|number, big?:boolean}} MapPin  `num`: drawn in place of the icon; `big`: a larger disc */
 /** @typedef {{kind:'maplibre',
  *   setUser(fix: import('../../core/types.js').Fix|null): void, setPins(pins: MapPin[]): void,
  *   setLine(a:[number,number]|null, b?:[number,number]): void,
  *   flyTo(lat:number, lon:number, zoom?:number): void, getCenter(): {lat:number, lon:number},
  *   setTheme(theme:'light'|'dark'|'hc'): void, resize(): void, destroy(): void}} MapHandle */
 /** @typedef {{center:{lat:number, lon:number}, zoom?:number, theme:'light'|'dark'|'hc', follow?:boolean,
- *   onLongPress?:(p:{lat:number, lon:number})=>void, onPinTap?:(id:string)=>void}} MapOptions */
+ *   cluster?:boolean, onLongPress?:(p:{lat:number, lon:number})=>void, onPinTap?:(id:string)=>void}} MapOptions
+ *   `cluster`: false keeps every pin on its own (numbered route stops); default true */
 
 export const LOAD_TIMEOUT_MS = 8000;
 

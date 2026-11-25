@@ -2,6 +2,7 @@
 import * as db from '../db/db.js';
 import { AppError } from '../errors.js';
 import { validateShift } from '../pure/validators.js';
+import { repairPlan } from '../pure/shift-repair.js';
 
 /** @typedef {import('../types.js').Shift} Shift */
 const ACTIVE_KEY = 'shift.activeId';
@@ -58,4 +59,49 @@ export async function getActiveId() {
 export async function setActiveId(id) {
   if (id === null) await db.del('kv', ACTIVE_KEY);
   else await db.put('kv', { key: ACTIVE_KEY, value: id });
+}
+
+/**
+ * Start of a shift: the record and the pointer to it in ONE transaction, so the app can die at any
+ * moment and leave either both or neither (never an open shift nobody points at).
+ * @param {Shift} s @returns {Promise<Shift>}
+ */
+export function openShift(s) {
+  const rec = checked(s);
+  return db.tx(['shifts', 'kv'], 'rw', async (t) => {
+    await t.put('shifts', rec);
+    await t.put('kv', { key: ACTIVE_KEY, value: rec.id });
+    return rec;
+  });
+}
+
+/**
+ * End of a shift: the closed record and the cleared pointer in one transaction. A shift that is
+ * already closed is returned as it is (a second tap changes nothing).
+ * @param {string} id @param {(s: Shift) => Shift} fn @returns {Promise<Shift>}
+ */
+export function closeShift(id, fn) {
+  return db.tx(['shifts', 'kv'], 'rw', async (t) => {
+    const cur = await t.get('shifts', id);
+    if (!cur) throw new AppError('shift-missing', 'core.err.generic');
+    const next = cur.endAt === null ? checked(fn(cur)) : cur;
+    if (next !== cur) await t.put('shifts', next);
+    if ((await t.get('kv', ACTIVE_KEY))?.value === id) await t.del('kv', ACTIVE_KEY);
+    return next;
+  });
+}
+
+/**
+ * Boot: reads the pointer and the shifts and repairs what does not fit (pure rules: repairPlan).
+ * One transaction. @returns {Promise<{active:Shift|null, closed:number, removed:number}>}
+ */
+export function recoverOpen() {
+  return db.tx(['shifts', 'kv'], 'rw', async (t) => {
+    const stored = (await t.get('kv', ACTIVE_KEY))?.value ?? null;
+    const plan = repairPlan(await t.getAll('shifts'), typeof stored === 'string' ? stored : null);
+    for (const s of plan.close) await t.put('shifts', s);
+    for (const id of plan.remove) await t.del('shifts', id);
+    if (stored !== null && plan.activeId === null) await t.del('kv', ACTIVE_KEY);
+    return { active: plan.active, closed: plan.close.length, removed: plan.remove.length };
+  });
 }

@@ -1,0 +1,8 @@
+/* Furgone qui. Layout only: every visual primitive comes from the kit. */
+/* On the shift home every pixel of height counts (SPEC T1-10): the tile is one touch target high. */
+.f-furgone-qui-tile .tile { min-height: var(--tap); padding: var(--sp-2) var(--sp-4); }
+/* The map leaves room for the distance above it and the buttons under it. */
+.f-furgone-qui-map .map { height: min(36dvh, 340px); min-height: 200px; }
+.f-furgone-qui-meta { margin: 0; }
+.f-furgone-qui-foot { display: grid; gap: var(--sp-2); justify-items: start; }
+.f-furgone-qui-foot p { margin: 0; }

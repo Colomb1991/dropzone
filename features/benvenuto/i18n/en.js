@@ -34,7 +34,7 @@ export default {
 
   'benvenuto.s1.title': 'Hi, I\'m Dropzone.',
   'benvenuto.s1.p1': 'I remember what you know about your zone and warn you when you are back there.',
-  'benvenuto.s1.p2': 'I\'m not your company\'s app: I don\'t read routes, parcels or labels.',
+  'benvenuto.s1.p2': 'I\'m not your company\'s app: I don\'t read its routes, parcels or labels.',
   'benvenuto.s1.p3': 'I\'m not connected to any courier company.',
 
   'benvenuto.s2.title': 'Your notes stay on your phone.',
@@ -68,7 +68,7 @@ export default {
 
   'benvenuto.s5.title': 'Two last things.',
   'benvenuto.s5.location': 'At shift start I ask for your location: on iPhone this happens every day, tap Allow.',
-  'benvenuto.s5.install': 'Install the app:',
+  'benvenuto.s5.install': 'Install the app',
   'benvenuto.s5.android': 'Tap Install. If you don\'t see it: menu ⋮ → Install app.',
   'benvenuto.s5.offline': 'Ready without network too',
   'benvenuto.s5.accept': 'By tapping Start you accept the [[terms|Terms of use]] and confirm that you have read the [[privacy|Privacy notice]]. You are at least 18.',

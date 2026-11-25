@@ -22,7 +22,7 @@ function LocationSheet({ onStart, onClose }) {
 function IdleHome() {
   const now = useTick(60000);
   const [askLocation, setAskLocation] = useState(false);
-  const tiles = useLive(['notes'], () => slots.collect('home.tiles', {}), []);
+  const tiles = useLive(['notes', 'route'], () => slots.collect('home.tiles', {}), []);
   // session.startShift runs inside the tap: it unlocks sound and asks for the position there.
   const start = useAction((opts) => session.startShift(opts));
   const onStart = () => {
@@ -48,7 +48,7 @@ function IdleHome() {
       <p class="t-title-m">${t(`turno.greet.${greeting(now)}`)}</p>
       <${SlotOutlet} name="home.idle" />
       ${shown.length > 0 && html`<${Tiles}>
-        ${shown.map((x) => html`<${Tile} icon=${x.icon} label=${t(x.labelKey)} href=${router.href(x.to)} />`)}
+        ${shown.map((x) => html`<${Tile} icon=${x.icon} label=${t(x.labelKey)} value=${x.value} href=${router.href(x.to)} />`)}
       <//>`}
       <p class="t-caption t-muted">${t('turno.idle.caption')}</p>
     </div>

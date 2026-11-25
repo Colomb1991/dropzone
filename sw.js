@@ -1,4 +1,4 @@
-// version: 0.1.0+4d8fc6c4
+// version: 0.1.0+fa8232e2
 // Classic service worker. The line above is rewritten by tools/release.mjs so this script changes
 // byte-wise with every release. Cache names equal core/env.js cacheName(): '<scope path><kind>'.
 'use strict';
@@ -15,7 +15,7 @@ var META_CACHE = SCOPE_PATH + 'meta';
 var HASHES_URL = './__hashes.json';
 var TILE_HOST = 'tiles.openfreemap.org';
 // Must equal core/net/services.js and the CSP connect-src (tests/audit/csp.test.mjs).
-var ALLOWED_HOSTS = ['tiles.openfreemap.org', 'overpass.private.coffee', 'overpass-api.de'];
+var ALLOWED_HOSTS = ['tiles.openfreemap.org', 'overpass.private.coffee', 'overpass-api.de', 'photon.komoot.io', 'api.open-meteo.com'];
 var TILE_CAP = 1500;
 var NETWORK_ONLY = ['sw.js', 'precache-manifest.js'];
 

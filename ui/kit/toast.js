@@ -18,6 +18,22 @@ export function toast(text, opts = {}) {
   notify();
 }
 
+/**
+ * Pixels from the bottom of the window to the top of the screen's sticky action bar, or null when
+ * there is none. The toast sits above the bar: it must never cover "Scrivi" and "Foto", which live
+ * there for the same 8 seconds as the toast "Nota salvata".
+ */
+function barLift() {
+  try {
+    const bar = document.querySelector('.screen__sticky');
+    if (!bar || typeof bar.getBoundingClientRect !== 'function') return null;
+    const top = bar.getBoundingClientRect().top;
+    return top > 0 && top < window.innerHeight ? Math.round(window.innerHeight - top) : null;
+  } catch (err) {
+    return null;
+  }
+}
+
 /** Rendered once by the shell. */
 export function ToastHost() {
   const [, bump] = useState(0);
@@ -52,8 +68,9 @@ export function ToastHost() {
     notify();
     if (action) action.onClick();
   };
+  const lift = barLift();
   return html`<div role="status" aria-live="polite">
-    <div class=${leaving ? 'toast is-leaving' : 'toast'} key=${id}>
+    <div class=${leaving ? 'toast is-leaving' : 'toast'} key=${id} style=${lift === null ? null : { bottom: `${lift + 8}px` }}>
       ${cur.icon && html`<${Icon} name=${cur.icon} />`}
       <span class="toast__text">${cur.text}</span>
       ${action && html`<button type="button" class="toast__action" onClick=${act}>${action.label}</button>`}

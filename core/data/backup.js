@@ -11,7 +11,9 @@ import { DB_VERSION, allStores } from '../db/schema.js';
 import { LIMITS } from '../pure/catalog.js';
 import {
   backupHeader, backupFilename, encodeLine, decodeLine, validateHeader, upgradeRecord, mergeDecision,
+  mediaRefsOf, exportsWhole, restoresWhole,
 } from '../pure/backup-format.js';
+import { closeAtLastSeen } from '../pure/shift-repair.js';
 
 const CHUNK = 4 * 1024 * 1024;
 const MEDIA_BATCH = 10;
@@ -30,14 +32,19 @@ export async function prepareBackup(opts) {
   /** @type {Record<string, number>} */
   const counts = {};
   const defs = backupDefs();
+  const allMedia = await db.getAll('media');
+  const media = opts.includeVan ? allMedia : allMedia.filter((m) => m.kind !== 'van');
+  // Only what can be restored whole: a record that needs photos this file leaves out (the van diary
+  // without its photos) stays out too, or a restore would show sessions with blank pictures.
+  const kept = new Set(media.map((m) => m.id));
+  const leftOut = new Set(allMedia.filter((m) => !kept.has(m.id)).map((m) => m.id));
   for (const def of defs.filter((d) => d.name !== 'media')) {
     let recs = await db.getAll(def.name);
     if (def.name === 'settings') recs = recs.filter((r) => settingInBackup(r.key));
+    recs = recs.filter((r) => exportsWhole(def, r, leftOut));
     counts[def.name] = recs.length;
     for (const r of recs) lines.push(encodeLine(def.name, r));
   }
-  let media = await db.getAll('media');
-  if (!opts.includeVan) media = media.filter((m) => m.kind !== 'van');
   counts.media = media.length;
   for (const m of media) lines.push(encodeLine('media', m));
   const at = now();
@@ -100,11 +107,7 @@ const ERR_KEYS = { 'not-backup': 'core.err.backupNot', 'too-new': 'core.err.back
  * A shift that was running when the file was made: on a phone that does not have it, nothing would
  * ever close it (the active-shift pointer is not in the file). It ends where it was last seen.
  */
-function closeOpenShift(s) {
-  const endAt = Math.max(s.startAt, s.lastSeenAt);
-  return { ...s, endAt, edited: true, breaks: s.breaks.map((b) => (b.endAt === null
-    ? { ...b, endAt: Math.max(b.startAt, Math.min(b.startAt + b.plannedMin * 60000, endAt)), auto: true } : b)) };
-}
+const closeOpenShift = closeAtLastSeen;
 
 /**
  * Merge only: adds what is missing, keeps the newer of two versions, fills settings never set.
@@ -121,6 +124,8 @@ export async function restoreBackup(file) {
   const records = [];
   /** @type {any[]} */
   let mediaBatch = [];
+  /** Ids of the media lines of the file: what a record may count on finding after the restore. */
+  const fileMedia = new Set();
   const keyOf = (s, r) => r[/** @type {any} */ (defs.get(s)).keyPath];
   const merge = async (t, s, r) => {
     const local = await t.get(s, keyOf(s, r));
@@ -149,6 +154,7 @@ export async function restoreBackup(file) {
       return true;
     }
     if (row.s === 'media') {
+      fileMedia.add(/** @type {any} */ (rec).id);
       mediaBatch.push(rec);
       if (mediaBatch.length >= MEDIA_BATCH) await flushMedia();
     } else {
@@ -157,8 +163,18 @@ export async function restoreBackup(file) {
     return true;
   });
   const names = [...new Set(records.map((x) => x.s))];
-  if (names.length) await db.tx(names, 'rw', async (t) => {
-    for (const x of records) await merge(t, x.s, x.r);
+  // Media that some record needs and the file does not carry: is it already on the phone?
+  const wanted = new Set(records.flatMap((x) => mediaRefsOf(/** @type {any} */ (defs.get(x.s)), x.r))
+    .filter((id) => !fileMedia.has(id)));
+  if (names.length) await db.tx(wanted.size ? [...new Set([...names, 'media'])] : names, 'rw', async (t) => {
+    const onPhone = new Set();
+    for (const id of wanted) if ((await t.count('media', { eq: id })) > 0) onPhone.add(id);
+    const hasMedia = (id) => fileMedia.has(id) || onPhone.has(id);
+    for (const x of records) {
+      // A van diary from a file made without its photos would come back as blank pictures: skipped.
+      if (restoresWhole(/** @type {any} */ (defs.get(x.s)), x.r, hasMedia)) await merge(t, x.s, x.r);
+      else stats.skipped++;
+    }
   });
   await flushMedia();
   await settings.loadSettings();

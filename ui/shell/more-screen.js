@@ -3,12 +3,8 @@
 // in the order of SPEC 2.3.
 import { html } from '../html.js';
 import * as router from '../../core/router.js';
-import * as env from '../../core/env.js';
-import * as share from '../../core/platform/share.js';
-import * as clipboard from '../../core/platform/clipboard.js';
 import * as session from '../../core/shift/session.js';
 import * as swClient from '../../core/sw-client.js';
-import * as log from '../../core/log.js';
 import { APP_VERSION } from '../../config/app.js';
 import { t } from '../../core/i18n.js';
 import { useStore } from '../hooks.js';
@@ -16,23 +12,11 @@ import { Screen } from '../kit/screen.js';
 import { List, ListRow } from '../kit/row.js';
 import { Toggle } from '../kit/toggle.js';
 import { confirm } from '../kit/dialog.js';
-import { toast } from '../kit/toast.js';
 import { moreItems } from './registry-view.js';
 
 const ORDER = { passenger: 50, share: 60, update: 80 };
-
-function shareApp() {
-  const url = env.appUrl();
-  const text = t('ui.share.text');
-  // First statement of the click: the share sheet needs the user activation.
-  share.shareText({ text, url }).then((res) => {
-    if (res === 'sandbox') toast(t('core.nav.sandbox'));
-    else if (res === 'unsupported') {
-      return clipboard.copyText(`${text} ${url}`).then(() => toast(t('core.action.copied'), { icon: 'check' }));
-    }
-    return undefined;
-  }).catch((err) => log.error('share', err));
-}
+/** "Fai provare a un collega": the screen of feature `invita` (QR code and link share). */
+const INVITE_PATH = '/invita';
 
 async function togglePassenger(on) {
   if (!on) {
@@ -61,7 +45,7 @@ export default function MoreScreen() {
       sub=${t('ui.more.passengerSub')} checked=${passenger} onChange=${togglePassenger} />` });
   }
   rows.push({ order: ORDER.share, node: html`<${ListRow} icon="share-2" tone="success" title=${t('core.nav.shareApp')}
-    sub=${t('ui.share.sub')} onClick=${shareApp} chevron />` });
+    sub=${t('ui.share.sub')} href=${router.href(INVITE_PATH)} chevron />` });
   if (updateReady) {
     const blocked = Boolean(shift) || !primary;
     rows.push({ order: ORDER.update, node: html`<${ListRow} icon="download" tone="info" title=${t('core.nav.updateApp')}

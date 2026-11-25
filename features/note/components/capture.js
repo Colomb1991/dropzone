@@ -99,7 +99,9 @@ export function useCapture() {
 
   const start = useAction(async (given) => {
     if (isLocked()) return;
-    const p = given ?? await positionNow();
+    // A note saved where the courier stands is not announced back in the same shift.
+    const own = given ? null : await positionNow();
+    const p = given ?? (own && { ...own, here: true });
     if (!p) {
       // No fix: the map with the crosshair is the other way to place a note.
       toast(t('core.err.noPosition'), { icon: 'triangle-alert' });

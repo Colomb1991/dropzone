@@ -6,7 +6,7 @@ import {
   Screen, Chips, Chip, List, ListRow, Button, LinkButton, Banner, Empty, NavigateSheet,
 } from '../../../ui/kit/index.js';
 import { t, tn, clock, geo, notes, format, handoff, router, log } from '../../../core/api.js';
-import { CHIPS, CHIP_ICONS, itemsForChip, ownSpots, hoursLabel, ageDays } from '../logic/poi.js';
+import { CHIPS, CHIP_ICONS, itemsForChip, pausaSections, ownSpots, hoursLabel, ageDays } from '../logic/poi.js';
 import { loadAround } from '../logic/cells.js';
 
 const RELOAD_M = 500;
@@ -33,7 +33,8 @@ export default function VicinoScreen({ query }) {
   const [lastChip, setLastChip] = useSetting('vicino.lastChip');
   const [serviceOn] = useSetting('svc.overpass');
   const [navApp] = useSetting('nav.app');
-  // "Pausa qui" (/vicino?pausa=1): toilets with the courier's own spots first, whatever chip was last.
+  // "Pausa qui" (/vicino?pausa=1, SPEC 4.2): the courier's own spots, then toilets, then bars and
+  // cafes, whatever chip was last. Tapping a chip goes back to the one-chip list.
   const [pausa, setPausa] = useState(query?.pausa === '1');
   const chip = !pausa && CHIPS.includes(lastChip) ? lastChip : 'bagni';
   const liveFix = useFix();
@@ -97,7 +98,11 @@ export default function VicinoScreen({ query }) {
   const records = Object.values(cells);
   const items = records.flatMap((r) => r.items);
   const mine = ownSpots(allNotes ?? [], here);
-  const places = here && chip !== 'miei' ? itemsForChip(chip, items, here) : [];
+  /** One list per chip shown: two in "Pausa qui", one otherwise, none for "I miei posti". */
+  let sections = [];
+  if (here && pausa) sections = pausaSections(items, here);
+  else if (here && chip !== 'miei') sections = [{ chip, places: itemsForChip(chip, items, here) }];
+  const places = sections.flatMap((s) => s.places);
   const showMine = chip === 'miei' || chip === 'bagni';
   const oldest = records.length ? Math.min(...records.map((r) => r.fetchedAt)) : null;
   const days = oldest === null ? 0 : ageDays(oldest, clock.now());
@@ -128,7 +133,8 @@ export default function VicinoScreen({ query }) {
   return html`<${Screen} title=${t('vicino.title')}>
     <div class="stack">
       <${Chips} label=${t('vicino.title')}>
-        ${CHIPS.map((c) => html`<${Chip} label=${t(`vicino.chip.${c}`)} icon=${CHIP_ICONS[c]} pressed=${c === chip}
+        ${CHIPS.map((c) => html`<${Chip} label=${t(`vicino.chip.${c}`)} icon=${CHIP_ICONS[c]}
+          pressed=${!pausa && c === chip}
           onToggle=${() => {
             setPausa(false);
             setLastChip(c).catch((err) => log.error('vicino', err));
@@ -141,6 +147,8 @@ export default function VicinoScreen({ query }) {
         && html`<p class="t-body-m t-muted" role="status">${t('vicino.searching')}</p>`}
       ${here && !notice && days >= 1 && places.length > 0
         && html`<p class="t-caption t-muted">${tn('vicino.age', days)}</p>`}
+      ${pausa && html`<p class="t-body-m">${t('vicino.pausa')}</p>`}
+      ${pausa && showMine && mine.length > 0 && html`<h2 class="section-title">${t('vicino.chip.miei')}</h2>`}
       ${showMine && mine.length > 0 && html`<${List} label=${t('vicino.chip.miei')}>
         ${mine.map(({ note, distM }) => html`<${ListRow} key=${note.id} icon="star" tone="success"
           title=${note.text || t('vicino.mine.untitled')} sub=${distM === null ? undefined : format.distance(distM)}
@@ -150,14 +158,16 @@ export default function VicinoScreen({ query }) {
       <//>`}
       ${chip === 'miei' && mine.length === 0 && html`<${Empty} icon="star" title=${t('vicino.mine.empty')}
         text=${t('vicino.mine.hint')} />`}
-      ${places.length > 0 && html`<${List} label=${t(`vicino.chip.${chip}`)}>
-        ${places.map((p) => html`<${ListRow} key=${p.id} icon=${CHIP_ICONS[chip]}
-          title=${p.name || t(`vicino.kind.${p.kind}`)}
-          sub=${[format.distance(p.distM), hoursLabel(p.hours, words)].filter(Boolean).join(' · ')}
-          tags=${placeTags(p)}
-          trailing=${html`<${GoButton} dest=${{ lat: p.lat, lon: p.lon, label: p.name || t(`vicino.kind.${p.kind}`) }}
-            navApp=${navApp} onAsk=${setDest} />`} />`)}
-      <//>`}
+      ${sections.filter((s) => s.places.length > 0).map((s) => html`
+        ${pausa && html`<h2 class="section-title">${t(`vicino.chip.${s.chip}`)}</h2>`}
+        <${List} key=${s.chip} label=${t(`vicino.chip.${s.chip}`)}>
+          ${s.places.map((p) => html`<${ListRow} key=${p.id} icon=${CHIP_ICONS[s.chip]}
+            title=${p.name || t(`vicino.kind.${p.kind}`)}
+            sub=${[format.distance(p.distM), hoursLabel(p.hours, words)].filter(Boolean).join(' · ')}
+            tags=${placeTags(p)}
+            trailing=${html`<${GoButton} dest=${{ lat: p.lat, lon: p.lon, label: p.name || t(`vicino.kind.${p.kind}`) }}
+              navApp=${navApp} onAsk=${setDest} />`} />`)}
+        <//>`)}
       ${here && chip !== 'miei' && none && !notice && html`<${Empty} icon="locate-fixed" title=${t('vicino.none')} />`}
       ${chip !== 'miei' && html`<p class="t-caption t-muted">${t('vicino.credit')} ${t('vicino.legal.accuracy')}</p>`}
     </div>

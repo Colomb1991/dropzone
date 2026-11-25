@@ -38,7 +38,9 @@ export function countNotes() {
 }
 
 /**
- * @param {{lat:number, lon:number, acc:number|null, cat:string, at:number, text?:string}} input
+ * @param {{lat:number, lon:number, acc:number|null, cat:string, at:number, text?:string, here?:boolean}} input
+ *   `here`: saved where the courier stands. The note counts as already announced (`lastFiredAt` = now,
+ *   same transaction), so the shift in progress does not sound its alert a few seconds after the save.
  * @returns {Promise<Note>} throws AppError('notes-limit') at 3,000
  */
 export async function createNote(input) {
@@ -49,9 +51,10 @@ export async function createNote(input) {
     biz: input.cat === 'negozio', visits: [], origin: 'mine', packName: null, importId: null,
     createdAt: input.at, updatedAt: input.at, localEditAt: null,
   });
-  return db.tx(['notes'], 'rw', async (t) => {
+  return db.tx(input.here ? ['notes', 'noteState'] : ['notes'], 'rw', async (t) => {
     if (await t.count('notes') >= LIMITS.notes) throw new AppError('notes-limit', 'core.err.notesLimit');
     await t.put('notes', note);
+    if (input.here) await t.put('noteState', { noteId: note.id, lastFiredAt: input.at, mutedUntil: null });
     return note;
   });
 }

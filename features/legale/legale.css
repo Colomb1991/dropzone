@@ -1,12 +1,12 @@
 /* Legal pages: prose at 60ch, body-m (DESIGN 4). */
 .f-legale-doc { max-width: 60ch; font-size: var(--fs-body-m); line-height: var(--lh-body-m); overflow-wrap: anywhere; }
-.f-legale-doc h2 { margin: var(--sp-6) 0 var(--sp-2); font-size: var(--fs-title-s); line-height: var(--lh-title-s); font-weight: 700; }
+.f-legale-doc h2 { margin: var(--sp-6) 0 var(--sp-2); font-family: var(--font-display); font-size: var(--fs-title-m); line-height: var(--lh-title-m); font-weight: var(--fw-title); letter-spacing: var(--ls-title); }
 .f-legale-doc p { margin: 0 0 var(--sp-3); }
 .f-legale-doc ul { margin: 0 0 var(--sp-3); padding-left: var(--sp-5); }
 .f-legale-doc li { margin-bottom: var(--sp-2); }
 .f-legale-doc li::marker { color: var(--text-3); }
-.f-legale-doc strong { font-weight: 700; }
+.f-legale-doc strong { font-weight: var(--fw-bold); }
 .f-legale-doc code { font-family: var(--font-mono); font-size: .9em; }
-.f-legale-doc a { font-weight: 600; }
-.f-legale-box { margin: var(--sp-2) 0 var(--sp-4); padding: var(--sp-4) var(--sp-4) var(--sp-2); background: var(--surface); border: var(--border-w) solid var(--border); border-left: 6px solid var(--primary); border-radius: var(--r-md); }
+.f-legale-doc a { font-weight: var(--fw-strong); }
+.f-legale-box { margin: var(--sp-2) 0 var(--sp-4); padding: var(--sp-4) var(--sp-4) var(--sp-2); background: var(--surface); border: var(--border-w) solid var(--border); border-radius: var(--r-lg); }
 .f-legale-box ul { margin-bottom: var(--sp-2); }

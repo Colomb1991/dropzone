@@ -32,6 +32,7 @@ export default {
   'vicino.hours.Su': 'dom',
   'vicino.hours.PH': 'festivi',
   'vicino.hours.off': 'chiuso',
+  'vicino.pausa': 'Per la pausa: i tuoi posti, bagni e bar qui vicino.',
   'vicino.searching': 'Cerco qui intorno…',
   'vicino.locating': 'Cerco la tua posizione…',
   'vicino.noPosition': 'Senza posizione non so cosa c\'è vicino.',

@@ -31,6 +31,7 @@ export default {
   'vicino.hours.Su': 'Sun',
   'vicino.hours.PH': 'holidays',
   'vicino.hours.off': 'closed',
+  'vicino.pausa': 'For your break: your spots, toilets and cafés nearby.',
   'vicino.searching': 'Searching around here…',
   'vicino.locating': 'Finding your position…',
   'vicino.noPosition': 'Without your position I can\'t tell what is nearby.',

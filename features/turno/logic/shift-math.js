@@ -82,3 +82,17 @@ export function breakState(shift, now) {
 export function validWeeklyHours(v) {
   return typeof v === 'number' && v >= 20 && v <= 48 && (v * 2) % 1 === 0;
 }
+
+/**
+ * Rows of the `shift.context` slot, most relevant first (lowest rank; ties keep the slot order).
+ * The shift home shows the first one only. Rows without a title or a rank are dropped.
+ * @template {{rank:number, title:string}} R
+ * @param {R[]|null|undefined} rows @returns {R[]}
+ */
+export function contextOrder(rows) {
+  return (Array.isArray(rows) ? rows : [])
+    .filter((r) => r && typeof r.title === 'string' && r.title !== '' && Number.isFinite(r.rank))
+    .map((r, i) => ({ r, i }))
+    .sort((a, b) => a.r.rank - b.r.rank || a.i - b.i)
+    .map((x) => x.r);
+}

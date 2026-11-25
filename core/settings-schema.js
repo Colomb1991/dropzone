@@ -21,6 +21,10 @@ export const CORE_SETTINGS = {
   'nav.app': { default: 'ask', validate: oneOf('ask', 'google', 'waze', 'apple') },
   'svc.tiles': { default: true, validate: isBool },
   'svc.overpass': { default: true, validate: isBool },
+  // Giro address search (Photon): off until the courier turns it on from the one-time sheet.
+  'svc.photon': { default: false, validate: isBool },
+  // Meteo del turno (Open-Meteo): off until the courier turns it on in Settings.
+  'svc.weather': { default: false, validate: isBool },
   'sos.contact': { default: null, validate: validateContact },
   onboardedAt: { default: null, validate: numOrNull },
   termsAcceptedAt: { default: null, validate: numOrNull },

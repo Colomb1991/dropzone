@@ -7,6 +7,8 @@
 .f-note-scroll .chip { flex: none; white-space: nowrap; }
 /* On the shift home the sticky bar is a row shared with "Segnala": the two buttons take two tracks. */
 .btn-row > .f-note-after { grid-column: span 2; }
+/* For the 8 seconds of "Scrivi" and "Foto" the row is theirs: three 72 px buttons do not fit 360 px. */
+.btn-row:has(> .f-note-after) > :not(.f-note-after) { display: none; }
 .f-note-mapbar { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-3); align-items: center; }
 .f-note-window { display: grid; grid-template-columns: 1fr 1fr auto; gap: var(--sp-2); align-items: center; }
 .f-note-text { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }

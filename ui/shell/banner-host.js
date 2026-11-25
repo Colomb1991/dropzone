@@ -45,8 +45,8 @@ function dismiss(id) {
 
 let locationAsked = 0;
 
-/** Screens that use the position: Turno home, Note, Vicino, Segnala, SOS. */
-const LOCATION_PATHS = ['/note', '/vicino', '/segnala', '/sos'];
+/** Screens that use the position: Turno home, Note, Vicino, Segnala, SOS, Giro. */
+const LOCATION_PATHS = ['/note', '/vicino', '/segnala', '/sos', '/giro'];
 
 /** "Posizione spenta" shows only where the position matters, not on settings, hours or diagnostics. */
 export function needsLocation(path) {

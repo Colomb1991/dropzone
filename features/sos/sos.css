@@ -1,0 +1,9 @@
+/* SOS: quick numbers and the accident card. Layout only: every visual primitive comes from the kit. */
+.f-sos-quick { display: grid; gap: var(--sp-3); justify-items: stretch; }
+.f-sos-quick > .btn { justify-self: start; }
+.f-sos-section { display: grid; gap: var(--sp-3); }
+.f-sos-section > .section-title, .f-sos-section > p { margin: 0; }
+.f-sos-section > .btn { justify-self: start; }
+/* Steps and row captions are read in full, never cut with an ellipsis. */
+.f-sos-steps .row__sub { display: block; -webkit-line-clamp: unset; overflow: visible; }
+.f-sos-steps > p { margin: 0; }

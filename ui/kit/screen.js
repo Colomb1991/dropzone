@@ -8,16 +8,17 @@ import { BannerHost } from '../shell/banner-host.js';
 /**
  * Header, banner slot, content, sticky bottom above the nav.
  * @param {{title:string, back?:boolean|string, tags?:any, sticky?:any, banner?:boolean, action?:any,
- *   children?:any}} props  `back`: true, or the fallback path; `banner:false` hides the banner slot
+ *   dense?:boolean, children?:any}} props  `back`: true, or the fallback path; `banner:false` hides
+ *   the banner slot; `dense`: tighter gaps, for the one screen that must fit a small phone (shift home)
  */
-export function Screen({ title, back, tags, sticky, banner = true, action, children }) {
+export function Screen({ title, back, tags, sticky, banner = true, action, dense, children }) {
   const h1 = useRef(/** @type {HTMLElement|null} */ (null));
   useEffect(() => {
     // A new screen starts at the top with its title focused (screen readers announce it).
     h1.current?.focus({ preventScroll: true });
   }, []);
   const goBack = () => router.back(typeof back === 'string' ? back : undefined);
-  return html`<main class="page screen">
+  return html`<main class=${dense ? 'page screen screen--dense' : 'page screen'}>
     <header class="screen__header">
       ${back && html`<button type="button" class="btn btn--ghost btn--icon screen__back"
         aria-label=${t('core.action.back')} onClick=${goBack}><${Icon} name="arrow-left" /></button>`}
