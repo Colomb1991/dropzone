@@ -1,0 +1,32 @@
+// Legal pages. Same keys and placeholders as it.js.
+export default {
+  'legale.nav': 'Privacy and legal notes',
+  'legale.title': 'Privacy and legal notes',
+  'legale.tabs': 'Legal pages',
+  'legale.tab.privacy': 'Privacy',
+  'legale.tab.termini': 'Terms',
+  'legale.tab.avvertenze': 'Disclaimers',
+  'legale.tab.servizi': 'Services and licences',
+  'legale.doc.privacy': 'Privacy notice',
+  'legale.doc.termini': 'Terms of use',
+  'legale.doc.avvertenze': 'Disclaimers',
+  'legale.doc.servizi': 'Services and licences',
+  'legale.operatorMissing': 'Operator details missing',
+  'legale.missingValue': '(to be completed)',
+  'legale.loadError': 'I can\'t open this page.',
+  'legale.loadErrorText': 'Check the network and try again.',
+
+  'legale.avv.1': '**No affiliation.** Dropzone is an independent project. It is not connected to, authorised by or sponsored by any delivery company, online marketplace or navigation app.',
+  'legale.avv.2': '**Driving.** The driver does not touch the phone. Touch the screen only when parked. An alert never replaces road signs or traffic law.',
+  'legale.avv.3': '**Limits.** Alerts work only with the app open and the screen on. They may be missing, late or wrong.',
+  'legale.avv.4': '**Maps and places.** Data comes from OpenStreetMap and may contain mistakes. Received notes and alerts are not verified.',
+  'legale.avv.5': '**SOS.** Dropzone is not an emergency service and alerts no one by itself. In danger, call 112.',
+  'legale.avv.6': '**Not proof.** Hours, files and van photos are personal notes, not official documents.',
+  'legale.avv.7': '**Your content.** Places, not people. You are responsible for what you write, photograph and share. Respect your company\'s rules.',
+  'legale.avv.8': '**Test version.** Free, without warranty, may change or stop. Data is only on the phone: back up every week.',
+  'legale.avv.9': 'Details are in the Terms of use.',
+
+  'legale.update.title': 'Terms and privacy updated',
+  'legale.update.text': 'We updated the Terms of use and the Privacy notice. Take a look. By continuing you accept the new Terms.',
+  'legale.update.read': 'Read',
+};

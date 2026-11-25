@@ -1,0 +1,3 @@
+.f-ore-month { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+.f-ore-month__name { flex: 1; margin: 0; text-align: center; }
+.f-ore-actions { display: grid; gap: var(--sp-3); margin-top: var(--sp-4); }

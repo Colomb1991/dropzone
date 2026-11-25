@@ -1,0 +1,32 @@
+// Legal pages. The nine "Avvertenze" lines are legal/in-app-notices.md section 4, word for word.
+export default {
+  'legale.nav': 'Privacy e note legali',
+  'legale.title': 'Privacy e note legali',
+  'legale.tabs': 'Pagine legali',
+  'legale.tab.privacy': 'Privacy',
+  'legale.tab.termini': 'Termini',
+  'legale.tab.avvertenze': 'Avvertenze',
+  'legale.tab.servizi': 'Servizi e licenze',
+  'legale.doc.privacy': 'Informativa privacy',
+  'legale.doc.termini': 'Termini d\'uso',
+  'legale.doc.avvertenze': 'Avvertenze',
+  'legale.doc.servizi': 'Servizi e licenze',
+  'legale.operatorMissing': 'Dati del gestore mancanti',
+  'legale.missingValue': '(da completare)',
+  'legale.loadError': 'Non riesco ad aprire questa pagina.',
+  'legale.loadErrorText': 'Controlla la rete e riprova.',
+
+  'legale.avv.1': '**Nessun legame.** Dropzone è un progetto indipendente. Non è collegata, autorizzata o sponsorizzata da nessuna azienda di consegne, piattaforma di vendita online o app di navigazione.',
+  'legale.avv.2': '**Guida.** Chi guida non tocca il telefono. Lo schermo si tocca solo da parcheggiato. Un avviso non sostituisce i cartelli né il Codice della Strada.',
+  'legale.avv.3': '**Limiti.** Gli avvisi funzionano solo con l\'app aperta e lo schermo acceso. Possono mancare, arrivare tardi o essere sbagliati.',
+  'legale.avv.4': '**Mappe e posti.** I dati vengono da OpenStreetMap e possono contenere errori. Note e segnalazioni ricevute non sono verificate.',
+  'legale.avv.5': '**SOS.** Dropzone non è un servizio di emergenza e non avvisa nessuno da sola. In pericolo chiama il 112.',
+  'legale.avv.6': '**Non sono prove.** Ore, file e foto del furgone sono appunti personali, non documenti ufficiali.',
+  'legale.avv.7': '**I tuoi contenuti.** Posti, non persone. Di quello che scrivi, fotografi e condividi rispondi tu. Rispetta le regole della tua azienda.',
+  'legale.avv.8': '**Versione di prova.** Gratuita, senza garanzie, può cambiare o fermarsi. I dati sono solo sul telefono: fai un backup ogni settimana.',
+  'legale.avv.9': 'I dettagli sono nei Termini d\'uso.',
+
+  'legale.update.title': 'Termini e privacy aggiornati',
+  'legale.update.text': 'Abbiamo aggiornato Termini d\'uso e Informativa privacy. Dai un\'occhiata. Continuando accetti i nuovi Termini.',
+  'legale.update.read': 'Leggi',
+};

@@ -1,0 +1,13 @@
+/* Layout of the notes feature only; every visual primitive comes from the kit. */
+.f-note-cats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2); }
+.f-note-cats .tile { min-height: 104px; padding: var(--sp-3); gap: var(--sp-2); }
+.f-note-cats .tile__label { font-size: var(--fs-caption); line-height: 1.2; overflow-wrap: anywhere; }
+.f-note-scroll { display: flex; gap: var(--sp-2); overflow-x: auto; margin: 0 calc(var(--sp-4) * -1); padding: 0 var(--sp-4) var(--sp-1); scrollbar-width: none; }
+.f-note-scroll::-webkit-scrollbar { display: none; }
+.f-note-scroll .chip { flex: none; white-space: nowrap; }
+/* On the shift home the sticky bar is a row shared with "Segnala": the two buttons take two tracks. */
+.btn-row > .f-note-after { grid-column: span 2; }
+.f-note-mapbar { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-3); align-items: center; }
+.f-note-window { display: grid; grid-template-columns: 1fr 1fr auto; gap: var(--sp-2); align-items: center; }
+.f-note-text { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.f-note-photo { display: inline-block; padding: 0; border: 0; background: none; border-radius: var(--r-sm); cursor: pointer; }

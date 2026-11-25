@@ -1,0 +1,6 @@
+/* Shift home fits 360 x 640 without scrolling (SPEC T1-10): two or three compact tiles in one row. */
+.f-turno-tiles { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: var(--sp-2); }
+.f-turno-tiles .tile { min-height: 72px; padding: var(--sp-2); }
+.f-turno-tiles .tile__label { overflow-wrap: anywhere; }
+.f-turno-count { margin: 0; text-align: center; }
+.f-turno-line { display: flex; align-items: center; gap: var(--sp-2); margin: 0; }

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="it" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; worker-src 'self'; manifest-src 'self'; connect-src 'self' https://tiles.openfreemap.org https://overpass.private.coffee https://overpass-api.de; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Dropzone</title>
+<meta name="description" content="Dropzone ricorda quello che sai della tua zona e ti avvisa quando ci ripassi. Le note stanno sul tuo telefono.">
+<meta name="theme-color" content="#111111">
+<meta name="color-scheme" content="dark light">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dropzone">
+<meta name="format-detection" content="telephone=no">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dropzone">
+<meta property="og:description" content="Conosce la tua zona. Ti guarda le spalle.">
+<meta property="og:image" content="./assets/social-preview.jpg">
+<script src="./theme-boot.js"></script>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="./css/tokens.css">
+<link rel="stylesheet" href="./css/components.css">
+<link rel="stylesheet" href="./css/shell.css">
+<link rel="modulepreload" href="./boot.js">
+<link rel="modulepreload" href="./core/api.js">
+<link rel="modulepreload" href="./ui/kit/index.js">
+<link rel="modulepreload" href="./vendor/preact/preact.mjs">
+<link rel="modulepreload" href="./vendor/preact/hooks.mjs">
+<link rel="modulepreload" href="./vendor/htm/htm.mjs">
+</head>
+<body>
+<div id="app">
+  <div class="boot" aria-hidden="true">
+    <span class="boot__mark">Dropzone</span>
+    <span class="boot__bar"></span>
+  </div>
+</div>
+<noscript>
+  <p class="noscript">Dropzone ha bisogno di JavaScript. Attivalo nel browser e ricarica la pagina.<br>Dropzone needs JavaScript. Turn it on in your browser and reload the page.</p>
+</noscript>
+<script type="module" src="./boot.js"></script>
+</body>
+</html>

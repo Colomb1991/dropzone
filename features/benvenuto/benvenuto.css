@@ -1,0 +1,32 @@
+/* Onboarding and install gate. Tokens only; the illustration keeps its 4:3 box (DECISIONS 11). */
+.f-benv-step { display: grid; gap: var(--sp-4); align-content: start; animation: fade-in var(--dur-2) var(--ease-out); }
+.f-benv-art { width: min(100%, 380px); margin: 0 auto; }
+@media (max-height: 700px) { .f-benv-art { width: min(100%, 272px); } }
+.f-benv-title { margin: 0; font-size: clamp(1.75rem, 8.5vw, 2.5rem); line-height: 1.1; font-weight: 800; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.f-benv-title:focus { outline: none; }
+.f-benv-lead { margin: 0; font-size: var(--fs-body-l); line-height: var(--lh-body-l); }
+.f-benv-lead--strong { font-size: var(--fs-title-m); line-height: var(--lh-title-m); font-weight: 700; }
+
+.f-benv-progress { display: flex; flex: 1; align-items: center; gap: var(--sp-2); min-height: var(--tap-min); }
+.f-benv-progress .btn { margin-left: calc(var(--sp-2) * -1); }
+.f-benv-bars { display: grid; flex: 1; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.f-benv-bars li { height: 8px; background: var(--surface-2); border: var(--border-w) solid var(--border); border-radius: var(--r-pill); transition: background-color var(--dur-2) linear; }
+.f-benv-bars li[data-on="true"] { background: var(--accent-text); border-color: var(--accent-text); }
+
+.f-benv-points { display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.f-benv-points li { display: grid; grid-template-columns: 40px 1fr; align-items: start; gap: var(--sp-3); font-size: var(--fs-body-l); line-height: var(--lh-body-l); }
+.f-benv-points li > span:last-child { padding-top: 6px; }
+.f-benv-disc { display: grid; place-items: center; width: 40px; height: 40px; background: var(--surface); color: var(--accent-text); border: var(--border-w) solid var(--border); border-radius: 50%; }
+
+.f-benv-numbered { display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; counter-reset: f-benv-step; }
+.f-benv-numbered li { display: grid; grid-template-columns: 40px 1fr; align-items: start; gap: var(--sp-3); counter-increment: f-benv-step; font-size: var(--fs-body-l); line-height: var(--lh-body-l); font-weight: 600; }
+.f-benv-numbered li::before { content: counter(f-benv-step); display: grid; place-items: center; width: 40px; height: 40px; background: var(--primary); color: var(--on-primary); border-radius: 50%; font-weight: 800; font-variant-numeric: tabular-nums; }
+.f-benv-numbered li > span { padding-top: 6px; }
+
+.f-benv-card { display: grid; gap: var(--sp-3); padding: var(--sp-4); background: var(--surface); border: var(--border-w) solid var(--border); border-radius: var(--r-xl); }
+.f-benv-card .section-title { margin: 0; }
+.f-benv-card .row { min-height: var(--tap); padding: 0; }
+
+.f-benv-sound { display: grid; gap: var(--sp-2); }
+.f-benv-said { display: flex; align-items: center; gap: var(--sp-2); margin: 0; color: var(--tone-success-text); font-size: var(--fs-title-m); line-height: var(--lh-title-m); font-weight: 700; }
+.f-benv-accept { margin: 0; color: var(--text-2); font-size: var(--fs-caption); line-height: var(--lh-caption); font-weight: 600; }

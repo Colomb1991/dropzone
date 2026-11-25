@@ -1,0 +1,98 @@
+{
+  "generatedBy": "tools/vendor.mjs",
+  "packages": [
+    {
+      "name": "preact",
+      "version": "11.2.0",
+      "licence": "MIT",
+      "files": [
+        {
+          "path": "preact/preact.mjs",
+          "source": "https://cdn.jsdelivr.net/npm/preact@11.2.0/dist/preact.mjs",
+          "upstreamSha256": "bdcbd9abdf2c77c5c45326eab42191e949222d479d0d5f69467387a77040cb55",
+          "sha256": "bdcbd9abdf2c77c5c45326eab42191e949222d479d0d5f69467387a77040cb55",
+          "bytes": 11970,
+          "rewritten": false
+        },
+        {
+          "path": "preact/hooks.mjs",
+          "source": "https://cdn.jsdelivr.net/npm/preact@11.2.0/hooks/dist/hooks.mjs",
+          "upstreamSha256": "e862ab2973aa6455eaa0f77c5d832d2157d6be59a17c8ba546550a575b58c6b4",
+          "sha256": "427a330c992595bfd3f6cfe43eb6ba7a238ea1a7fa99c0e4a8f380a30dde473b",
+          "bytes": 3634,
+          "rewritten": true
+        },
+        {
+          "path": "preact/LICENSE",
+          "source": "https://cdn.jsdelivr.net/npm/preact@11.2.0/LICENSE",
+          "upstreamSha256": "1fe6958409c8c257a70c587a18b6f7f412b179b456630790d30b2ec9a8e4b7d4",
+          "sha256": "1fe6958409c8c257a70c587a18b6f7f412b179b456630790d30b2ec9a8e4b7d4",
+          "bytes": 1087,
+          "rewritten": false
+        }
+      ]
+    },
+    {
+      "name": "htm",
+      "version": "3.1.1",
+      "licence": "Apache-2.0",
+      "files": [
+        {
+          "path": "htm/htm.mjs",
+          "source": "https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.mjs",
+          "upstreamSha256": "ab33dd3f38059b9be4d5f5350128eefb2356639c4e0bbe9d9e8b3ba75847e9e4",
+          "sha256": "ab33dd3f38059b9be4d5f5350128eefb2356639c4e0bbe9d9e8b3ba75847e9e4",
+          "bytes": 1207,
+          "rewritten": false
+        },
+        {
+          "path": "htm/LICENSE",
+          "source": "https://cdn.jsdelivr.net/npm/htm@3.1.1/LICENSE",
+          "upstreamSha256": "740725f7252e750af735d0028cc534970772f513331e9f68150fede8fb3ce00f",
+          "sha256": "740725f7252e750af735d0028cc534970772f513331e9f68150fede8fb3ce00f",
+          "bytes": 11341,
+          "rewritten": false
+        }
+      ]
+    },
+    {
+      "name": "maplibre-gl",
+      "version": "6.19.0",
+      "licence": "BSD-3-Clause",
+      "files": [
+        {
+          "path": "maplibre-gl/maplibre-gl.mjs",
+          "source": "https://cdn.jsdelivr.net/npm/maplibre-gl@6.19.0/dist/maplibre-gl.mjs",
+          "upstreamSha256": "01590c9875ea5bb0e8cdc534479f607f7d1695ca5debbccaf730edf5fa5f39e5",
+          "sha256": "01590c9875ea5bb0e8cdc534479f607f7d1695ca5debbccaf730edf5fa5f39e5",
+          "bytes": 1106041,
+          "rewritten": false
+        },
+        {
+          "path": "maplibre-gl/maplibre-gl-worker.mjs",
+          "source": "https://cdn.jsdelivr.net/npm/maplibre-gl@6.19.0/dist/maplibre-gl-worker.mjs",
+          "upstreamSha256": "c8564c4a4147326a587c9cc4c2a871c4b02a6c37c3f1ea51da55be3220d4b112",
+          "sha256": "c8564c4a4147326a587c9cc4c2a871c4b02a6c37c3f1ea51da55be3220d4b112",
+          "bytes": 550754,
+          "rewritten": false
+        },
+        {
+          "path": "maplibre-gl/maplibre-gl.css",
+          "source": "https://cdn.jsdelivr.net/npm/maplibre-gl@6.19.0/dist/maplibre-gl.css",
+          "upstreamSha256": "a90798a1953017790e590f7e1bd35ff103a8a4263972cb47290b78adf86f8c20",
+          "sha256": "a90798a1953017790e590f7e1bd35ff103a8a4263972cb47290b78adf86f8c20",
+          "bytes": 71596,
+          "rewritten": false
+        },
+        {
+          "path": "maplibre-gl/LICENSE.txt",
+          "source": "https://cdn.jsdelivr.net/npm/maplibre-gl@6.19.0/LICENSE.txt",
+          "upstreamSha256": "ee5fc05a0677eaf69601d2c7db0d9ecd6cc27c3abc1d0733bc9ed34707cf8ef2",
+          "sha256": "ee5fc05a0677eaf69601d2c7db0d9ecd6cc27c3abc1d0733bc9ed34707cf8ef2",
+          "bytes": 5984,
+          "rewritten": false
+        }
+      ]
+    }
+  ]
+}

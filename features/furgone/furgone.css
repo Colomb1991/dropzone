@@ -1,0 +1,7 @@
+/* Diario furgone. Tokens only. */
+.f-furgone-thumbs { display: flex; gap: var(--sp-3); margin: 0; padding: var(--sp-1) 0 var(--sp-2); overflow-x: auto; list-style: none; overscroll-behavior-x: contain; }
+.f-furgone-thumbs li { display: grid; flex: none; justify-items: center; gap: var(--sp-1); }
+.f-furgone-thumb { display: block; padding: 0; background: none; border: 0; border-radius: var(--r-md); cursor: pointer; }
+.f-furgone-thumb:active { opacity: .8; }
+.f-furgone-bar { display: grid; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+.f-furgone-day { margin: 0; }
