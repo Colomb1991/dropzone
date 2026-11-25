@@ -1,4 +1,4 @@
-// version: 0.1.0+ddc248c3
+// version: 0.2.0+adaa9fb1
 // Classic service worker. The line above is rewritten by tools/release.mjs so this script changes
 // byte-wise with every release. Cache names equal core/env.js cacheName(): '<scope path><kind>'.
 'use strict';
