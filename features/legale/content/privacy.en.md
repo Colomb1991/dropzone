@@ -96,6 +96,7 @@ It leaves only when you tap send, share or a navigation app. You see the text or
 - **Hours (CSV) and van photos:** only if you export or share them.
 - **SOS:** a message with your position and a Google Maps link, to the contact you chose, by WhatsApp or SMS. To show the preview WhatsApp may open that link: Google sees the point and your IP address.
 - **Take me there:** opens Google Maps, Waze or Apple Maps with the destination. The same goes for "Go" in the route planner and for "Walk me there" in Van is here: the destination is the point of the stop or of the van.
+- **Map mistake:** opens OpenStreetMap in the browser at the point where you are. OpenStreetMap sees that point and your IP address. You write and send the note there, not from {{APP_NAME}}: it is public and it stays.
 - **Quick numbers:** tapping one opens the phone app with that number. You make the call.
 - **Let a colleague try it:** the app link, or a QR code drawn on the phone. It holds the app address only: none of your data.
 

@@ -96,6 +96,7 @@ Parte solo quando tocchi invia, condividi o un navigatore. Prima vedi il testo o
 - **Ore (CSV) e foto del furgone:** solo se li esporti o li condividi.
 - **SOS:** un messaggio con la tua posizione e un link a Google Maps, al contatto che hai scelto, via WhatsApp o SMS. Per mostrare l'anteprima WhatsApp può aprire quel link: Google vede il punto e il tuo indirizzo IP.
 - **Portami lì:** apre Google Maps, Waze o Mappe di Apple con la destinazione. Vale anche per "Vai" del Giro e per "Portami lì a piedi" di Furgone qui: la destinazione è il punto della fermata o del furgone.
+- **Errore della mappa:** apre OpenStreetMap nel browser sul punto in cui sei. OpenStreetMap vede quel punto e il tuo indirizzo IP. La nota la scrivi e la mandi lì, non da {{APP_NAME}}: è pubblica e resta.
 - **Numeri rapidi:** toccandone uno si apre il telefono con quel numero. La chiamata la fai tu.
 - **Fai provare a un collega:** il link dell'app, oppure un codice QR disegnato sul telefono. Dentro c'è solo l'indirizzo dell'app: niente dati tuoi.
 

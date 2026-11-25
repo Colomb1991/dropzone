@@ -17,6 +17,14 @@ export function mapPointUrl(lat, lon) {
   return `https://www.google.com/maps/search/?api=1&query=${c5(lat)}%2C${c5(lon)}`;
 }
 
+/**
+ * OpenStreetMap's own "new note" form, centred on a point (checked on 2026-11-25: it opens without
+ * an account). The point travels in the fragment; the note is written and sent there, not here.
+ */
+export function osmNoteUrl(lat, lon) {
+  return `https://www.openstreetmap.org/note/new#map=18/${c5(lat)}/${c5(lon)}`;
+}
+
 /** @param {string} text @param {string} [number] E.164 */
 export function whatsappUrl(text, number) {
   const digits = number ? number.replace(/\D/g, '') : '';

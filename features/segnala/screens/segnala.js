@@ -2,8 +2,10 @@
 // Segnala: six type tiles, the active alerts, and the paste bridge for iPhone.
 import { html, useState } from '../../../ui/html.js';
 import { useLive, useAction, useTick, useLang } from '../../../ui/hooks.js';
-import { Screen, Tiles, Tile, List, ListRow, Button, Field, Empty, toast } from '../../../ui/kit/index.js';
-import { t, clock, geo, store, speech, cues, format, clipboard, AppError } from '../../../core/api.js';
+import {
+  Screen, Tiles, Tile, List, ListRow, Button, LinkButton, Field, Empty, Sheet, toast,
+} from '../../../ui/kit/index.js';
+import { t, clock, geo, store, speech, cues, format, clipboard, handoff, AppError } from '../../../core/api.js';
 import { ALERT_TYPES, alertType, alertTypeKey } from '../../../core/pure/catalog.js';
 import { decodeAlert, extractAlertFragment } from '../logic/alert-link.js';
 import {
@@ -21,11 +23,29 @@ export async function addFromText(text) {
   toast(t(result === 'added' ? 'segnala.added' : 'segnala.present'), { icon: 'check' });
 }
 
+/**
+ * "La mappa è sbagliata?": a wrong one-way, a closed road, a missing house number. The app sends
+ * nothing: it opens OpenStreetMap's note form on the point, where volunteers check and fix the map.
+ * @param {{point:{lat:number, lon:number}|null, onClose:()=>void}} props
+ */
+function MapErrorSheet({ point, onClose }) {
+  return html`<${Sheet} open=${Boolean(point)} title=${t('segnala.map.title')} onClose=${onClose}>
+    ${point && html`<div class="stack">
+      <p class="t-body-m">${t('segnala.map.how')}</p>
+      <p class="t-body-m t-muted">${t('segnala.map.when')}</p>
+      <p class="t-caption t-muted">${t('segnala.legal.osmNote')}</p>
+      <${LinkButton} size="xl" block external icon="external-link" label=${t('segnala.map.open')}
+        href=${handoff.osmNoteUrl(point.lat, point.lon)} onClick=${onClose} />
+    </div>`}
+  <//>`;
+}
+
 export default function SegnalaScreen() {
   useLang();
   const now = useTick(60000);
   const { data: alerts } = useLive(['alerts'], () => listActive(), []);
   const [sending, setSending] = useState(/** @type {any} */ (null));
+  const [mapPoint, setMapPoint] = useState(/** @type {{lat:number, lon:number}|null} */ (null));
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pasted, setPasted] = useState('');
 
@@ -42,6 +62,12 @@ export default function SegnalaScreen() {
   const remove = useAction(async (id) => {
     await removeAlert(id);
     toast(t('segnala.removed'));
+  });
+  const mapError = useAction(async () => {
+    // The same rule as an alert: the note must land where the courier is now.
+    const pos = freshFix(clock.now()) ?? await geo.currentPosition({ maxAgeMs: FRESH_FIX_MS });
+    if (!pos) throw new AppError('no-position', 'segnala.err.noPosition');
+    setMapPoint({ lat: pos.lat, lon: pos.lon });
   });
   const paste = useAction(async () => {
     // Clipboard first: reading needs the tap.
@@ -95,7 +121,14 @@ export default function SegnalaScreen() {
           <${Field} label=${t('segnala.paste.field')} value=${pasted} onInput=${setPasted} />
           <${Button} block label=${t('segnala.paste.add')} disabled=${pasted.trim() === ''} onClick=${addPasted.run} />`}
       </section>
+      <section class="stack">
+        <h2 class="t-title-m">${t('segnala.map.section')}</h2>
+        <p class="t-body-m t-muted">${t('segnala.map.hint')}</p>
+        <${Button} variant="secondary" block icon="map" label=${t('segnala.map.button')} busy=${mapError.busy}
+          onClick=${mapError.run} />
+      </section>
     </div>
     <${SendSheet} alert=${sending} onClose=${() => setSending(null)} />
+    <${MapErrorSheet} point=${mapPoint} onClose=${() => setMapPoint(null)} />
   <//>`;
 }
