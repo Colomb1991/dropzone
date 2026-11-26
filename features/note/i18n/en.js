@@ -5,7 +5,7 @@ export default {
   'note.capture.here': 'Note here',
   'note.capture.write': 'Write',
   'note.capture.photo': 'Photo',
-  'note.capture.placeholder': 'Type, or dictate with the keyboard microphone. E.g. If no answer, parcel behind the gate.',
+  'note.capture.placeholder': 'Type, or dictate with the keyboard microphone. E.g. 12 Main Street: loose dog in the yard.',
   'note.capture.kind': 'Kind of note',
   'note.capture.needText': 'Write the note or pick a kind.',
   'note.capture.imprecise': 'Position is imprecise (±{n} m). Fix it later.',

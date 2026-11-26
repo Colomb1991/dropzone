@@ -3,7 +3,7 @@
 // spoken line is also a caption; "Esci" reloads the page.
 import { html, useEffect, useRef, useState } from '../../../ui/html.js';
 import {
-  Screen, Button, Art, Icon, Banner, Card, List, ListRow, Tile, toast,
+  Screen, Button, Art, Icon, Banner, Card, Chip, List, ListRow, toast,
 } from '../../../ui/kit/index.js';
 import { useStore, useLang, useAction } from '../../../ui/hooks.js';
 import { t, clock, format, events, tick, log } from '../../../core/api.js';
@@ -95,10 +95,15 @@ export function Player({ initial = {}, onReplay }) {
         <${Button} block size="xl" icon="map-pin-plus" label=${t('demo.noteHere')} onClick=${() => setPicking(true)} />`}
       ${!saved && picking && html`
         <p class="f-demo-hint">${t('demo.what')}</p>
-        <div class="f-demo-cats">
-          ${NOTE_CATS.map((id) => html`<${Tile} key=${id} icon=${category(id).icon} label=${t(catLabelKey(id))}
-            primary=${id === 'cane'} disabled=${id !== 'cane'} onClick=${save} />`)}
-        </div>`}
+        <div class="field">
+          <span class="field__label">${t('demo.field')}</span>
+          <p class="field__control f-demo-text">${t('demo.text')}</p>
+        </div>
+        <div class="f-demo-kinds" role="group" aria-label=${t('demo.kind')}>
+          ${NOTE_CATS.map((id) => html`<${Chip} key=${id} icon=${category(id).icon} label=${t(catLabelKey(id))}
+            pressed=${id === 'cane'} disabled=${id !== 'cane'} />`)}
+        </div>
+        <${Button} block size="xl" icon="check" label=${t('demo.save')} onClick=${save} />`}
       ${saved && html`
         <p class="f-demo-ok"><${Icon} name="check" size=${32} /><span>${t('demo.saved')}</span></p>
         ${dogRow}

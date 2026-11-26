@@ -5,7 +5,7 @@ export default {
   'note.capture.here': 'Nota qui',
   'note.capture.write': 'Scrivi',
   'note.capture.photo': 'Foto',
-  'note.capture.placeholder': 'Scrivi, o detta col microfono della tastiera. Es. Se non risponde, pacco dietro il cancello.',
+  'note.capture.placeholder': 'Scrivi, o detta col microfono della tastiera. Es. Via Roma 12: cane libero in cortile.',
   'note.capture.kind': 'Tipo di nota',
   'note.capture.needText': 'Scrivi la nota o scegli un tipo.',
   'note.capture.imprecise': 'Posizione poco precisa (±{n} m). La sistemi dopo.',
