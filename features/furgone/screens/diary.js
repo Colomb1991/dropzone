@@ -1,5 +1,5 @@
 // @ts-check
-// Diario furgone (SPEC 4.11): four guided photos plus extras, each with date, time and position
+// Diario furgone (SPEC 4.11): eight guided photos plus extras, each with date, time and position
 // burnt in; share (files are ready before the tap); history by day. Photos are never auto-deleted:
 // the courier deletes one photo from its full-screen view, a whole session from the history.
 import { html, useEffect, useRef, useState } from '../../../ui/html.js';
@@ -12,7 +12,7 @@ import {
   t, AppError, clock, format, db, media, geo, photo, camera, share, shifts, settings, cues, log, errors, router,
 } from '../../../core/api.js';
 import {
-  CORNERS, EXTRA, MAX_EXTRA, validateVan, newSession, stampText, photoFileName, nextCorner, extraCount,
+  POSITIONS, EXTRA, MAX_EXTRA, validateVan, newSession, stampText, photoFileName, nextPosition, extraCount,
   canAddExtra, addPhoto, currentSession, defaultKind, groupByDay, oldPhotos, sessionBytes, withChecks,
 } from '../logic/van.js';
 import { checksSummary } from '../logic/checklist.js';
@@ -181,7 +181,7 @@ export default function VanDiary() {
   const current = currentSession(sessions, kind, shift?.id ?? null, now);
   const photos = current?.photos ?? [];
   const checks = current?.checks ?? [];
-  const next = nextCorner(photos);
+  const next = nextPosition(photos);
   const shareKit = useSessionShare(current);
   const old = oldPhotos(sessions, now);
   const days = groupByDay(sessions);
@@ -236,7 +236,7 @@ export default function VanDiary() {
       });
       cues.playCue('saved');
       cues.haptic('saved');
-      toast(t(nextCorner(rec.photos) === null && label !== EXTRA ? 'furgone.allDone' : 'furgone.saved'), { icon: 'check' });
+      toast(t(nextPosition(rec.photos) === null && label !== EXTRA ? 'furgone.allDone' : 'furgone.saved'), { icon: 'check' });
     }).catch(showError).then(() => setBusy(null));
   };
   const shoot = (label) => () => {
@@ -252,7 +252,7 @@ export default function VanDiary() {
     if (label) shootNow(label);
   };
 
-  const cornerTile = (c) => {
+  const positionTile = (c) => {
     const taken = photos.find((p) => p.label === c);
     const value = busy === c ? t('furgone.saving')
       : taken ? t('furgone.tile.done', { time: format.time(taken.at) }) : t('furgone.tile.todo');
@@ -276,7 +276,7 @@ export default function VanDiary() {
         onClick=${() => setChecksOpen(true)} />
     <//>
     <${Tiles}>
-      ${CORNERS.map(cornerTile)}
+      ${POSITIONS.map(positionTile)}
       <${Tile} wide icon="plus" label=${t('furgone.extra')} onClick=${shoot(EXTRA)}
         value=${busy === EXTRA ? t('furgone.saving') : t('furgone.extraCount', { n: extraCount(photos), max: MAX_EXTRA })}
         disabled=${!canAddExtra(photos)} reason=${t('furgone.limit')} />

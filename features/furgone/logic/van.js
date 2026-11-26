@@ -4,11 +4,15 @@ import { LIMITS } from '../../../core/pure/catalog.js';
 import { isLat, isLon } from '../../../core/pure/validators.js';
 import { validateChecks } from './checklist.js';
 
-/** The four guided corners, in the order of SPEC 3.2. */
-export const CORNERS = /** @type {const} */ (['fl', 'fr', 'rr', 'rl']);
+/**
+ * The eight guided positions, in the order the owner asked for (DECISIONS 12.6): three in front,
+ * the two sides, three behind. The corner keys are the ones of Release 1, so the photos already
+ * in a diary keep their place and take the new names.
+ */
+export const POSITIONS = /** @type {const} */ (['fl', 'front', 'fr', 'right', 'left', 'rear', 'rl', 'rr']);
 export const EXTRA = 'extra';
 export const MAX_PHOTOS = LIMITS.vanPhotos;
-export const MAX_EXTRA = MAX_PHOTOS - CORNERS.length;
+export const MAX_EXTRA = MAX_PHOTOS - POSITIONS.length;
 export const OLD_DAYS = 45;
 const DAY_MS = 86400000;
 
@@ -64,7 +68,7 @@ export function mediaRefs(rec) {
 const p2 = (n) => String(n).padStart(2, '0');
 
 /**
- * The strip burnt into the picture: `25/11/2026 07:42 · 45.46420, 9.19000 ±12 m · Davanti sinistra`.
+ * The strip burnt into the picture: `25/11/2026 07:42 · 45.46420, 9.19000 ±12 m · Anteriore sinistro`.
  * Local time of the phone. Without a fix the middle part is `noPosition`.
  * @param {{at:number, lat?:number|null, lon?:number|null, acc?:number|null, label:string, noPosition:string}} s
  */
@@ -84,23 +88,23 @@ export function photoFileName(at) {
     + `-${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}.jpg`;
 }
 
-/** The corner to shoot next, or null when the four are done. */
-export function nextCorner(photos) {
+/** The position to shoot next, or null when the eight are done. */
+export function nextPosition(photos) {
   const done = new Set(photos.map((p) => p.label));
-  return CORNERS.find((c) => !done.has(c)) ?? null;
+  return POSITIONS.find((c) => !done.has(c)) ?? null;
 }
 
 export function extraCount(photos) {
   return photos.filter((p) => p.label === EXTRA).length;
 }
 
-/** False at 8 extras or 12 photos. */
+/** False at 8 extras or 16 photos. */
 export function canAddExtra(photos) {
   return extraCount(photos) < MAX_EXTRA && photos.length < MAX_PHOTOS;
 }
 
 /**
- * Adds a photo. A corner taken again replaces its earlier shot; extras pile up.
+ * Adds a photo. A position taken again replaces its earlier shot; extras pile up.
  * The first fix of the session becomes its position.
  * @param {VanSession} session @param {VanPhoto} photo
  * @param {{lat:number, lon:number, acc:number}|null} fix
@@ -110,7 +114,7 @@ export function addPhoto(session, photo, fix) {
   const old = photo.label === EXTRA ? undefined : session.photos.find((p) => p.label === photo.label);
   const rest = old ? session.photos.filter((p) => p !== old) : session.photos;
   if (rest.length >= MAX_PHOTOS) return { session, replaced: null };
-  const order = (p) => (p.label === EXTRA ? CORNERS.length : CORNERS.indexOf(/** @type {any} */ (p.label)));
+  const order = (p) => (p.label === EXTRA ? POSITIONS.length : POSITIONS.indexOf(/** @type {any} */ (p.label)));
   const photos = [...rest, photo].sort((a, b) => order(a) - order(b) || a.at - b.at);
   const located = session.lat !== null || !fix;
   return {
