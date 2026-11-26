@@ -1,6 +1,6 @@
 // @ts-check
 // Pure helpers of the notes feature: no DOM, no storage. `t` is passed in so Node can test the copy.
-import { category, catLabelKey, catVoiceKey, cutAtWord } from '../../../core/pure/catalog.js';
+import { category, catLabelKey, catVoiceKey, cutAtWord, LIMITS } from '../../../core/pure/catalog.js';
 import { scheduleStatus, activeToday, isoDay } from '../../../core/pure/schedule.js';
 import { visitPattern } from '../../../core/pure/visits.js';
 import { distM } from '../../../core/pure/geo-math.js';
@@ -11,7 +11,7 @@ import { hasEnforcementWord, cleanText } from '../../../core/pure/validators.js'
 
 export const FILTER_INCOMPLETE = 'da-completare';
 export const TITLE_MAX = 30;
-export const TEXT_MAX = 140;
+export const TEXT_MAX = LIMITS.noteText;
 
 /** "7" for 07:00, "7:30" for 07:30. */
 export function shortTime(hhmm) {

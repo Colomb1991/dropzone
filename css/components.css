@@ -216,6 +216,12 @@ dialog::backdrop { background: var(--scrim); }
 }
 .sheet[open] { display: flex; animation: sheet-in var(--dur-3) var(--ease-out); }
 .sheet::backdrop { animation: fade-in var(--dur-2) linear; }
+/* A sheet with a text field hangs from the top: the keyboard takes the bottom half of the screen. */
+.sheet--top { inset: 0 0 auto 0; padding-top: var(--safe-t); border-radius: 0 0 var(--r-xl) var(--r-xl); border-top: 0; border-bottom: var(--border-w) solid var(--border); max-height: max(280px, min(88dvh, var(--sheet-room, 88dvh))); }
+.sheet--top .sheet__footer { padding-bottom: var(--sp-4); }
+.sheet--top[open] { animation-name: sheet-in-top; }
+.sheet--top .sheet__header { padding-top: var(--sp-3); }
+.sheet--top .sheet__header::before { display: none; }
 .sheet__header { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-5) var(--sp-2) var(--sp-2) var(--sp-4); position: relative; }
 .sheet__header::before { content: ""; position: absolute; top: var(--sp-2); left: 50%; width: 44px; height: 4px; margin-left: -22px; border-radius: var(--r-pill); background: var(--border-strong); }
 .sheet__title { margin: 0; font-family: var(--font-display); font-size: var(--fs-title-m); line-height: var(--lh-title-m); font-weight: var(--fw-title); letter-spacing: var(--ls-title); }
@@ -376,6 +382,7 @@ input[type="range"] { width: 100%; height: var(--tap); accent-color: var(--switc
 @keyframes fade-in { from { opacity: 0; } }
 @keyframes fade-out { to { opacity: 0; } }
 @keyframes sheet-in { from { transform: translateY(100%); } }
+@keyframes sheet-in-top { from { transform: translateY(-100%); } }
 @keyframes toast-in { from { opacity: 0; transform: translateY(16px); } }
 @keyframes bump { 50% { transform: scale(1.12); } }
 @keyframes band-pulse { 50% { opacity: .7; } }

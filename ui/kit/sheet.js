@@ -8,10 +8,12 @@ import { inOverlay, syncDialog } from './portal.js';
 
 /**
  * Bottom sheet on a native <dialog>. Closes itself with onClose('moving') when driving turns fast.
+ * `top`: the sheet hangs from the top of the screen. For sheets with a text field: the keyboard
+ * covers the bottom half of a phone, and what must be tapped after typing has to stay above it.
  * @param {{open:boolean, title:string, onClose:(why:'user'|'moving')=>void, footer?:any,
- *   keepWhileMoving?:boolean, children?:any}} props
+ *   keepWhileMoving?:boolean, top?:boolean, children?:any}} props
  */
-export function Sheet({ open, title, onClose, footer, keepWhileMoving, children }) {
+export function Sheet({ open, title, onClose, footer, keepWhileMoving, top, children }) {
   const ref = useRef(/** @type {HTMLDialogElement|null} */ (null));
   const close = useRef(onClose);
   close.current = onClose;
@@ -20,6 +22,20 @@ export function Sheet({ open, title, onClose, footer, keepWhileMoving, children 
     syncDialog(ref.current, open);
   }, [open]);
   useEffect(() => () => syncDialog(ref.current, false), []);
+  useEffect(() => {
+    // The keyboard shrinks what is visible, not the page: a top sheet is told how much room is
+    // left, so its footer (the button) sits just above the keys and its body scrolls if it must.
+    const vv = globalThis.visualViewport;
+    const el = ref.current;
+    if (!open || !top || !vv || !el) return undefined;
+    const fit = () => el.style.setProperty('--sheet-room', `${Math.round(vv.height)}px`);
+    fit();
+    vv.addEventListener('resize', fit);
+    return () => {
+      vv.removeEventListener('resize', fit);
+      el.style.removeProperty('--sheet-room');
+    };
+  }, [open, top]);
   useEffect(() => {
     if (!open || keepWhileMoving) return undefined;
     return events.on('driving:changed', (e) => {
@@ -34,7 +50,7 @@ export function Sheet({ open, title, onClose, footer, keepWhileMoving, children 
   const onScrim = (e) => {
     if (e.target === ref.current) close.current('user');
   };
-  return inOverlay(html`<dialog class="sheet" ref=${ref} aria-label=${title} onCancel=${onCancel} onClick=${onScrim}>
+  return inOverlay(html`<dialog class=${top ? 'sheet sheet--top' : 'sheet'} ref=${ref} aria-label=${title} onCancel=${onCancel} onClick=${onScrim}>
     ${open && html`
       <div class="sheet__header">
         <h2 class="sheet__title">${title}</h2>

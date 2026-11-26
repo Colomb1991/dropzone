@@ -39,7 +39,7 @@ export const NEARBY_RADIUS_M = 150;
 export const STOP_RADIUS_M = 60;
 
 export const LIMITS = {
-  notes: 3000, noteText: 140, spokenText: 90, visits: 60, alertText: 60, alertUrl: 300,
+  notes: 3000, noteText: 280, spokenText: 90, visits: 60, alertText: 60, alertUrl: 300,
   zoneNotes: 1000, zoneBytes: 10485760, zoneName: 40, backupBytes: 104857600,
   notePhotoBytes: 614400, vanPhotos: 16, contactName: 20,
 };
